@@ -528,7 +528,7 @@ function init() {
 function setupSpeech() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) {
-    document.querySelector('.voice-hint').textContent = 'Voice input not supported on this browser. Use Chrome on Android or Safari on iOS.';
+    showTranscript('⚠️ Speech Recognition not available in this browser. Try Chrome on Android.');
     document.getElementById('voiceBtn').style.opacity = '0.4';
     document.getElementById('voiceBtn').disabled = true;
     return;
@@ -540,39 +540,69 @@ function setupSpeech() {
 
   recognition.onresult = (e) => {
     const interim = Array.from(e.results).map(r => r[0].transcript).join(' ');
-    const t = document.getElementById('transcript');
-    t.textContent = interim;
-    t.classList.add('visible');
-    if (e.results[e.results.length-1].isFinal) {
+    showTranscript(interim);
+    if (e.results[e.results.length - 1].isFinal) {
       parseVoice(interim);
     }
   };
   recognition.onend = () => stopListening();
-  recognition.onerror = () => stopListening();
+  recognition.onerror = (e) => {
+    stopListening();
+    const msgs = {
+      'not-allowed': '🚫 Microphone blocked. Go to Chrome Settings > Site Settings > Microphone and allow this site.',
+      'no-speech': '🎤 No speech detected. Tap mic and speak clearly.',
+      'network': '🌐 Network error with speech service. Check your connection.',
+      'aborted': '⏹ Stopped.',
+      'audio-capture': '🎤 No microphone found on this device.',
+      'service-not-allowed': '🚫 Speech service not allowed. Make sure you are on HTTPS.'
+    };
+    showTranscript(msgs[e.error] || '⚠️ Error: ' + e.error + '. Try again.');
+  };
 }
 
-function toggleVoice() { 
-if (!recognition) { alert('Voice not supported. Use Chrome on Android.'); return; } 
-isListening ? stopListening() : startListening(); 
-} 
-
-function startListening() { 
-navigator.mediaDevices.getUserMedia({ audio: true }) 
-.then(stream => { 
-stream.getTracks().forEach(t => t.stop()); 
-isListening = true; 
-document.getElementById('voiceRing').classList.add('listening'); 
-document.getElementById('transcript').classList.add('visible'); 
-document.getElementById('transcript').textContent = 'Listening…'; 
-recognition.start(); 
-}) 
-.catch(() => alert('Microphone blocked. Go to Chrome Settings → Site Settings → Microphone → Allow.')); 
+function showTranscript(msg) {
+  const t = document.getElementById('transcript');
+  t.textContent = msg;
+  t.classList.add('visible');
 }
 
+async function toggleVoice() {
+  if (isListening) { stopListening(); return; }
+
+  // First explicitly request mic permission — required on Android Chrome
+  try {
+    showTranscript('Requesting microphone permission…');
+    document.getElementById('transcript').classList.add('visible');
+    await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    showTranscript('🚫 Microphone permission denied. Tap the lock icon in your address bar and allow the microphone, then try again.');
+    return;
+  }
+
+  if (!recognition) {
+    showTranscript('⚠️ Speech recognition not supported. Try Chrome on Android.');
+    return;
+  }
+
+  startListening();
+}
+
+function startListening() {
+  isListening = true;
+  document.getElementById('voiceRing').classList.add('listening');
+  showTranscript('🎤 Listening… speak now');
+  try {
+    recognition.start();
+  } catch(e) {
+    stopListening();
+    showTranscript('⚠️ Could not start: ' + e.message + '. Tap mic to try again.');
+  }
+}
 
 function stopListening() {
   isListening = false;
   document.getElementById('voiceRing').classList.remove('listening');
+  try { recognition.stop(); } catch(e) {}
 }
 
 function parseVoice(text) {
