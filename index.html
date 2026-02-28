@@ -551,18 +551,24 @@ function setupSpeech() {
   recognition.onerror = () => stopListening();
 }
 
-function toggleVoice() {
-  if (!recognition) return;
-  isListening ? stopListening() : startListening();
+function toggleVoice() { 
+if (!recognition) { alert('Voice not supported. Use Chrome on Android.'); return; } 
+isListening ? stopListening() : startListening(); 
+} 
+
+function startListening() { 
+navigator.mediaDevices.getUserMedia({ audio: true }) 
+.then(stream => { 
+stream.getTracks().forEach(t => t.stop()); 
+isListening = true; 
+document.getElementById('voiceRing').classList.add('listening'); 
+document.getElementById('transcript').classList.add('visible'); 
+document.getElementById('transcript').textContent = 'Listening…'; 
+recognition.start(); 
+}) 
+.catch(() => alert('Microphone blocked. Go to Chrome Settings → Site Settings → Microphone → Allow.')); 
 }
 
-function startListening() {
-  isListening = true;
-  document.getElementById('voiceRing').classList.add('listening');
-  document.getElementById('transcript').classList.add('visible');
-  document.getElementById('transcript').textContent = 'Listening…';
-  recognition.start();
-}
 
 function stopListening() {
   isListening = false;
