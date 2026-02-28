@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<!-- saved from url=(0059)file:///C:/Users/Jim%20Jendusa/Downloads/TimeTracker_1.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>TimeLog — Field Time Tracker</title>
+<link href="./TimeLog — Field Time Tracker_files/css2" rel="stylesheet">
+<script src="./TimeLog — Field Time Tracker_files/xlsx.full.min.js.download"></script>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --border: #2e2e2e;
+    --accent: #e8ff3c;
+    --accent2: #3cffb0;
+    --red: #ff4444;
+    --text: #f0f0f0;
+    --muted: #888;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+  header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+  }
+  .logo { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo span { color: var(--accent); }
+  .date-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 999px;
+    color: var(--muted);
+  }
+
+  /* VOICE BUTTON */
+  .voice-section {
+    padding: 28px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .voice-ring {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .voice-ring::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    transition: all 0.3s;
+  }
+  .voice-ring.listening::before {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 8px rgba(232,255,60,0.08), 0 0 0 20px rgba(232,255,60,0.04);
+    animation: pulse 1.2s ease infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 8px rgba(232,255,60,0.08), 0 0 0 20px rgba(232,255,60,0.04); }
+    50% { box-shadow: 0 0 0 14px rgba(232,255,60,0.12), 0 0 0 32px rgba(232,255,60,0.06); }
+  }
+  #voiceBtn {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    color: var(--text);
+    font-size: 32px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #voiceBtn:active { transform: scale(0.95); }
+  .voice-ring.listening #voiceBtn {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+  }
+  .voice-hint {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    max-width: 260px;
+    line-height: 1.5;
+  }
+  .voice-transcript {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--accent2);
+    min-height: 44px;
+    width: 100%;
+    max-width: 400px;
+    line-height: 1.5;
+    display: none;
+  }
+  .voice-transcript.visible { display: block; }
+
+  /* FORM */
+  .form-section {
+    padding: 0 20px;
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: block;
+    margin-bottom: 6px;
+  }
+  input[type=text], input[type=date], input[type=number], textarea, select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 80px; }
+  select option { background: #1a1a1a; }
+
+  /* TOGGLE */
+  .toggle-group {
+    display: flex;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .toggle-group button {
+    flex: 1;
+    padding: 11px 10px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .toggle-group button.active {
+    background: var(--accent);
+    color: #000;
+  }
+
+  /* WORK TYPE CHIPS */
+  .chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip {
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .chip.active {
+    border-color: var(--accent2);
+    background: rgba(60,255,176,0.08);
+    color: var(--accent2);
+  }
+
+  /* SUBMIT */
+  #submitBtn {
+    width: 100%;
+    padding: 15px;
+    border-radius: var(--radius);
+    border: none;
+    background: var(--accent);
+    color: #000;
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  #submitBtn:active { transform: scale(0.98); opacity: 0.9; }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 10px 0;
+  }
+
+  /* ENTRIES */
+  .entries-section {
+    padding: 24px 20px 0;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  .entries-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(232,255,60,0.06);
+  }
+  .export-btn {
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .export-btn:active { background: rgba(232,255,60,0.1); }
+
+  .entry-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .entry-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .entry-project {
+    font-weight: 500;
+    font-size: 15px;
+    flex: 1;
+  }
+  .entry-hours {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .entry-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .tag {
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .tag.job { border-color: #4a9eff; color: #4a9eff; }
+  .tag.proposal { border-color: #ff9f4a; color: #ff9f4a; }
+  .tag.structural { border-color: var(--accent2); color: var(--accent2); }
+  .tag.architectural { border-color: #c084fc; color: #c084fc; }
+  .tag.construction { border-color: #fb7185; color: #fb7185; }
+  .entry-notes {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .entry-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+  .delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--border);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+  .delete-btn:hover { color: var(--red); }
+
+  .empty-state {
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    padding: 40px 20px;
+  }
+  .empty-state .icon { font-size: 36px; margin-bottom: 12px; }
+
+  .total-bar {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    font-size: 13px;
+  }
+  .total-bar span { color: var(--muted); }
+  .total-bar strong { font-family: 'DM Mono', monospace; color: var(--accent); font-size: 16px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--accent);
+    color: #000;
+    padding: 12px 24px;
+    border-radius: 999px;
+    font-weight: 500;
+    font-size: 14px;
+    z-index: 999;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    background: rgba(232,255,60,0.1);
+    border: 1px solid rgba(232,255,60,0.3);
+    color: var(--accent);
+    padding: 3px 8px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .field-row { display: flex; gap: 12px; }
+  .field-row > div { flex: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Time<span>LOG</span></div>
+  <div class="date-pill" id="headerDate">Sat, Feb 28, 2026</div>
+</header>
+
+<!-- VOICE SECTION -->
+<div class="voice-section">
+  <div class="ai-badge">✦ AI Voice Input</div>
+  <div class="voice-ring" id="voiceRing">
+    <button id="voiceBtn" onclick="toggleVoice()">🎤</button>
+  </div>
+  <p class="voice-hint">Tap the mic and say something like: <em>"2.5 hours on Creekside Apartments, job, structural engineering, reviewed shear wall calculations"</em></p>
+  <div class="voice-transcript" id="transcript"></div>
+</div>
+
+<!-- FORM -->
+<div class="form-section">
+
+  <div>
+    <label>Date</label>
+    <input type="date" id="entryDate">
+  </div>
+
+  <div>
+    <label>Project Name</label>
+    <input type="text" id="projectName" placeholder="e.g. Creekside Apartments">
+  </div>
+
+  <div class="field-row">
+    <div>
+      <label>Hours</label>
+      <input type="number" id="hours" placeholder="0.0" step="0.25" min="0">
+    </div>
+    <div>
+      <label>Type</label>
+      <div class="toggle-group">
+        <button class="active" id="btnJob" onclick="setType(&#39;Job&#39;)">Job</button>
+        <button id="btnProposal" onclick="setType(&#39;Proposal&#39;)">Proposal</button>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <label>Work Type</label>
+    <div class="chip-group">
+      <div class="chip" onclick="setWork(this,&#39;Structural Engineering&#39;)">Structural Engineering</div>
+      <div class="chip" onclick="setWork(this,&#39;Architectural Design&#39;)">Architectural Design</div>
+      <div class="chip" onclick="setWork(this,&#39;Construction Management&#39;)">Construction Management</div>
+    </div>
+  </div>
+
+  <div>
+    <label>Notes</label>
+    <textarea id="notes" placeholder="Describe what you worked on..."></textarea>
+  </div>
+
+  <button id="submitBtn" onclick="saveEntry()">+ Log Time</button>
+</div>
+
+<!-- ENTRIES -->
+<div class="entries-section">
+  <hr class="divider">
+  <div class="entries-header">
+    <div class="section-title">Entries</div>
+    <button class="export-btn" onclick="exportExcel()">⬇ Export Excel</button>
+  </div>
+
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="setFilter(&#39;all&#39;,this)">All</button>
+    <button class="filter-btn" onclick="setFilter(&#39;today&#39;,this)">Today</button>
+    <button class="filter-btn" onclick="setFilter(&#39;week&#39;,this)">This Week</button>
+    <button class="filter-btn" onclick="setFilter(&#39;month&#39;,this)">This Month</button>
+    <button class="filter-btn" onclick="setFilter(&#39;year&#39;,this)">This Year</button>
+  </div>
+
+  <div class="total-bar">
+    <span>Total Hours</span>
+    <strong id="totalHours">0.00</strong>
+  </div>
+
+  <div id="entriesList"><div class="empty-state"><div class="icon">⏱</div>No entries for this period</div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+let entries = JSON.parse(localStorage.getItem('timelog_entries') || '[]');
+let currentType = 'Job';
+let currentWork = '';
+let currentFilter = 'all';
+let recognition = null;
+let isListening = false;
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+function init() {
+  const today = new Date();
+  document.getElementById('headerDate').textContent = today.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+  document.getElementById('entryDate').value = today.toISOString().split('T')[0];
+  renderEntries();
+  setupSpeech();
+}
+
+// ── VOICE ──────────────────────────────────────────────────────────────────
+function setupSpeech() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    document.querySelector('.voice-hint').textContent = 'Voice input not supported on this browser. Use Chrome on Android or Safari on iOS.';
+    document.getElementById('voiceBtn').style.opacity = '0.4';
+    document.getElementById('voiceBtn').disabled = true;
+    return;
+  }
+  recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onresult = (e) => {
+    const interim = Array.from(e.results).map(r => r[0].transcript).join(' ');
+    const t = document.getElementById('transcript');
+    t.textContent = interim;
+    t.classList.add('visible');
+    if (e.results[e.results.length-1].isFinal) {
+      parseVoice(interim);
+    }
+  };
+  recognition.onend = () => stopListening();
+  recognition.onerror = () => stopListening();
+}
+
+function toggleVoice() {
+  if (!recognition) return;
+  isListening ? stopListening() : startListening();
+}
+
+function startListening() {
+  isListening = true;
+  document.getElementById('voiceRing').classList.add('listening');
+  document.getElementById('transcript').classList.add('visible');
+  document.getElementById('transcript').textContent = 'Listening…';
+  recognition.start();
+}
+
+function stopListening() {
+  isListening = false;
+  document.getElementById('voiceRing').classList.remove('listening');
+}
+
+function parseVoice(text) {
+  const t = text.toLowerCase();
+
+  // Hours: "2.5 hours", "two and a half hours", "45 minutes"
+  let hours = null;
+  const hrMatch = t.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?)/);
+  const minMatch = t.match(/(\d+)\s*minutes?/);
+  if (hrMatch) hours = parseFloat(hrMatch[1]);
+  else if (minMatch) hours = Math.round(parseFloat(minMatch[1]) / 0.25 * 0.25 * 100) / 100 / 1;
+  if (minMatch && hrMatch) hours = parseFloat(hrMatch[1]) + parseFloat(minMatch[1]) / 60;
+  if (hours !== null) document.getElementById('hours').value = Math.round(hours * 4) / 4;
+
+  // Type
+  if (t.includes('proposal')) setType('Proposal');
+  else if (t.includes('job')) setType('Job');
+
+  // Work type
+  if (t.includes('structural')) setWork(document.querySelector('[onclick*="Structural"]'), 'Structural Engineering');
+  else if (t.includes('architect')) setWork(document.querySelector('[onclick*="Architectural"]'), 'Architectural Design');
+  else if (t.includes('construction') || t.includes('cm')) setWork(document.querySelector('[onclick*="Construction"]'), 'Construction Management');
+
+  // Date
+  if (t.includes('today')) document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
+  else if (t.includes('yesterday')) {
+    const y = new Date(); y.setDate(y.getDate() - 1);
+    document.getElementById('entryDate').value = y.toISOString().split('T')[0];
+  }
+
+  // Project name — extract meaningful phrase (heuristic)
+  let proj = '';
+  const projPatterns = [
+    /(?:on|for|project)\s+([a-z0-9 \-]+?)(?:\s+(?:job|proposal|structural|architect|construction|hours|for|\d))/i,
+    /(?:on|for|project)\s+([a-z0-9 \-]+?)(?:\s*[,.]|$)/i
+  ];
+  for (const rx of projPatterns) {
+    const m = text.match(rx);
+    if (m) { proj = m[1].trim(); break; }
+  }
+  if (proj.length > 2) document.getElementById('projectName').value = toTitleCase(proj);
+
+  // Notes — use most of the transcript minus recognized commands
+  let notes = text;
+  notes = notes.replace(/\d+(?:\.\d+)?\s*(?:hours?|hrs?)/gi, '');
+  notes = notes.replace(/\d+\s*minutes?/gi, '');
+  notes = notes.replace(/\b(job|proposal|structural engineering|architectural design|construction management|today|yesterday)\b/gi, '');
+  notes = notes.replace(/(?:on|for)\s+[a-z0-9 \-]+(?=[,\.]|$)/i, '');
+  notes = notes.replace(/\s{2,}/g, ' ').trim();
+  if (notes.length > 4) document.getElementById('notes').value = notes;
+
+  showToast('Voice parsed! Review & confirm below.');
+}
+
+function toTitleCase(s) {
+  return s.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+}
+
+// ── FORM CONTROLS ──────────────────────────────────────────────────────────
+function setType(t) {
+  currentType = t;
+  document.getElementById('btnJob').classList.toggle('active', t === 'Job');
+  document.getElementById('btnProposal').classList.toggle('active', t === 'Proposal');
+}
+
+function setWork(el, w) {
+  currentWork = w;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+// ── SAVE ───────────────────────────────────────────────────────────────────
+function saveEntry() {
+  const project = document.getElementById('projectName').value.trim();
+  const hours = parseFloat(document.getElementById('hours').value);
+  const date = document.getElementById('entryDate').value;
+  const notes = document.getElementById('notes').value.trim();
+
+  if (!project) { showToast('Please enter a project name.'); return; }
+  if (!hours || hours <= 0) { showToast('Please enter hours.'); return; }
+  if (!currentWork) { showToast('Please select a work type.'); return; }
+  if (!date) { showToast('Please select a date.'); return; }
+
+  const entry = {
+    id: Date.now(),
+    date, project, hours,
+    type: currentType,
+    workType: currentWork,
+    notes
+  };
+  entries.unshift(entry);
+  localStorage.setItem('timelog_entries', JSON.stringify(entries));
+  clearForm();
+  renderEntries();
+  showToast('✓ Time logged!');
+}
+
+function clearForm() {
+  document.getElementById('projectName').value = '';
+  document.getElementById('hours').value = '';
+  document.getElementById('notes').value = '';
+  document.getElementById('transcript').classList.remove('visible');
+  document.getElementById('transcript').textContent = '';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  currentWork = '';
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderEntries();
+}
+
+function filterEntries() {
+  const now = new Date();
+  return entries.filter(e => {
+    const d = new Date(e.date + 'T12:00:00');
+    if (currentFilter === 'today') return e.date === now.toISOString().split('T')[0];
+    if (currentFilter === 'week') {
+      const start = new Date(now); start.setDate(now.getDate() - now.getDay());
+      start.setHours(0,0,0,0);
+      return d >= start;
+    }
+    if (currentFilter === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    if (currentFilter === 'year') return d.getFullYear() === now.getFullYear();
+    return true;
+  });
+}
+
+function workTagClass(w) {
+  if (w.includes('Structural')) return 'structural';
+  if (w.includes('Architectural')) return 'architectural';
+  if (w.includes('Construction')) return 'construction';
+  return '';
+}
+
+function renderEntries() {
+  const filtered = filterEntries();
+  const total = filtered.reduce((s, e) => s + e.hours, 0);
+  document.getElementById('totalHours').textContent = total.toFixed(2);
+
+  const list = document.getElementById('entriesList');
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">⏱</div>No entries for this period</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(e => `
+    <div class="entry-card">
+      <button class="delete-btn" onclick="deleteEntry(${e.id})">✕</button>
+      <div class="entry-top">
+        <div class="entry-project">${e.project}</div>
+        <div class="entry-hours">${e.hours}h</div>
+      </div>
+      <div class="entry-meta">
+        <span class="tag ${e.type.toLowerCase()}">${e.type}</span>
+        <span class="tag ${workTagClass(e.workType)}">${e.workType}</span>
+      </div>
+      ${e.notes ? `<div class="entry-notes">${e.notes}</div>` : ''}
+      <div class="entry-date">${formatDate(e.date)}</div>
+    </div>
+  `).join('');
+}
+
+function formatDate(d) {
+  return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+}
+
+function deleteEntry(id) {
+  entries = entries.filter(e => e.id !== id);
+  localStorage.setItem('timelog_entries', JSON.stringify(entries));
+  renderEntries();
+}
+
+// ── EXPORT ─────────────────────────────────────────────────────────────────
+function exportExcel() {
+  const filtered = filterEntries();
+  if (!filtered.length) { showToast('No entries to export.'); return; }
+
+  const filterLabel = { all:'All', today:'Today', week:'This Week', month:'This Month', year:'This Year' }[currentFilter];
+
+  // Sort by date ascending for Ajera paste
+  const sorted = [...filtered].sort((a,b) => a.date.localeCompare(b.date));
+
+  const rows = sorted.map(e => ({
+    'Date': formatDate(e.date),
+    'Project': e.project,
+    'Job / Proposal': e.type,
+    'Work Type': e.workType,
+    'Hours': e.hours,
+    'Notes': e.notes || ''
+  }));
+
+  // Add totals row
+  rows.push({
+    'Date': '',
+    'Project': 'TOTAL',
+    'Job / Proposal': '',
+    'Work Type': '',
+    'Hours': sorted.reduce((s,e) => s + e.hours, 0),
+    'Notes': ''
+  });
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+
+  // Column widths
+  ws['!cols'] = [
+    { wch: 18 }, { wch: 28 }, { wch: 16 }, { wch: 26 }, { wch: 8 }, { wch: 50 }
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Time Log');
+
+  const fileName = `TimeLog_${filterLabel.replace(' ','_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+  XLSX.writeFile(wb, fileName);
+  showToast(`⬇ Exported: ${fileName}`);
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+init();
+</script>
+
+
+</body></html>
