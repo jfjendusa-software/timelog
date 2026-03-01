@@ -1,669 +1,495 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
+<!-- saved from url=(0053)file:///C:/Users/Jim%20Jendusa/Downloads/index_7.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>TimeLog — Field Time Tracker</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="./TimeLog — Field Time Tracker 7_files/css2" rel="stylesheet">
+<script src="./TimeLog — Field Time Tracker 7_files/xlsx.full.min.js.download"></script>
 <style>
-  :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface2: #242424;
-    --border: #2e2e2e;
-    --accent: #e8ff3c;
-    --accent2: #3cffb0;
-    --red: #ff4444;
-    --text: #f0f0f0;
-    --muted: #888;
-    --radius: 12px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    padding-bottom: 80px;
-  }
-  header {
-    padding: 24px 20px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    background: var(--bg);
-    z-index: 100;
-  }
-  .logo { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
-  .logo span { color: var(--accent); }
-  .date-pill {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    padding: 6px 12px;
-    border-radius: 999px;
-    color: var(--muted);
-  }
+:root {
+  --bg: #0f0f0f; --surface: #1a1a1a; --surface2: #242424;
+  --border: #2e2e2e; --accent: #e8ff3c; --accent2: #3cffb0;
+  --red: #ff4444; --yellow: #ffb830; --text: #f0f0f0;
+  --muted: #888; --radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; padding-bottom: 100px; }
 
-  /* VOICE BUTTON */
-  .voice-section {
-    padding: 28px 20px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-  }
-  .voice-ring {
-    position: relative;
-    width: 120px;
-    height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .voice-ring::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    border: 2px solid var(--border);
-    transition: all 0.3s;
-  }
-  .voice-ring.listening::before {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 8px rgba(232,255,60,0.08), 0 0 0 20px rgba(232,255,60,0.04);
-    animation: pulse 1.2s ease infinite;
-  }
-  @keyframes pulse {
-    0%,100% { box-shadow: 0 0 0 8px rgba(232,255,60,0.08), 0 0 0 20px rgba(232,255,60,0.04); }
-    50% { box-shadow: 0 0 0 14px rgba(232,255,60,0.12), 0 0 0 32px rgba(232,255,60,0.06); }
-  }
-  #voiceBtn {
-    width: 88px;
-    height: 88px;
-    border-radius: 50%;
-    background: var(--surface2);
-    border: 2px solid var(--border);
-    color: var(--text);
-    font-size: 32px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-  }
-  #voiceBtn:active { transform: scale(0.95); }
-  .voice-ring.listening #voiceBtn {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #000;
-  }
-  .voice-hint {
-    font-size: 13px;
-    color: var(--muted);
-    text-align: center;
-    max-width: 260px;
-    line-height: 1.5;
-  }
-  .voice-transcript {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 16px;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--accent2);
-    min-height: 44px;
-    width: 100%;
-    max-width: 400px;
-    line-height: 1.5;
-    display: none;
-  }
-  .voice-transcript.visible { display: block; }
+header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--bg); z-index: 100; }
+.logo { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+.logo span { color: var(--accent); }
+.header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.date-pill { font-family: 'DM Mono', monospace; font-size: 11px; background: var(--surface2); border: 1px solid var(--border); padding: 5px 10px; border-radius: 999px; color: var(--muted); }
+#syncStatus { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
 
-  /* FORM */
-  .form-section {
-    padding: 0 20px;
-    max-width: 500px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-  label {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    display: block;
-    margin-bottom: 6px;
-  }
-  input[type=text], input[type=date], input[type=number], textarea, select {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    padding: 12px 14px;
-    outline: none;
-    transition: border-color 0.2s;
-    -webkit-appearance: none;
-  }
-  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
-  textarea { resize: vertical; min-height: 80px; }
-  select option { background: #1a1a1a; }
+.tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 57px; z-index: 99; }
+.tab { flex: 1; padding: 12px; text-align: center; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-  /* TOGGLE */
-  .toggle-group {
-    display: flex;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-  .toggle-group button {
-    flex: 1;
-    padding: 11px 10px;
-    border: none;
-    background: transparent;
-    color: var(--muted);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .toggle-group button.active {
-    background: var(--accent);
-    color: #000;
-  }
+.panel { display: none; padding: 20px; max-width: 500px; margin: 0 auto; }
+.panel.active { display: block; }
 
-  /* WORK TYPE CHIPS */
-  .chip-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .chip {
-    padding: 8px 14px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--muted);
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-  .chip.active {
-    border-color: var(--accent2);
-    background: rgba(60,255,176,0.08);
-    color: var(--accent2);
-  }
+/* SETUP */
+.setup-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; gap: 20px; }
+.setup-overlay .logo2 { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; }
+.setup-overlay .logo2 span { color: var(--accent); }
+.setup-overlay p { color: var(--muted); text-align: center; font-size: 14px; line-height: 1.6; max-width: 300px; }
+.setup-overlay input { width: 100%; max-width: 320px; background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 18px; padding: 14px 18px; outline: none; text-align: center; }
+.setup-overlay input:focus { border-color: var(--accent); }
+.setup-btn { width: 100%; max-width: 320px; padding: 15px; border-radius: var(--radius); border: none; background: var(--accent); color: #000; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; }
 
-  /* SUBMIT */
-  #submitBtn {
-    width: 100%;
-    padding: 15px;
-    border-radius: var(--radius);
-    border: none;
-    background: var(--accent);
-    color: #000;
-    font-family: 'Syne', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    letter-spacing: 0.3px;
-    transition: opacity 0.2s, transform 0.1s;
-  }
-  #submitBtn:active { transform: scale(0.98); opacity: 0.9; }
+label { font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; display: block; margin-bottom: 6px; }
+input[type=text], input[type=date], input[type=number], textarea, select { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; padding: 12px 14px; outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
+input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+textarea { resize: vertical; min-height: 70px; }
+select option { background: #1a1a1a; }
+.field-row { display: flex; gap: 12px; }
+.field-row > div { flex: 1; }
+.form-group { margin-bottom: 14px; }
 
-  /* DIVIDER */
-  .divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 10px 0;
-  }
+.autocomplete-wrap { position: relative; }
+.autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface2); border: 1px solid var(--accent); border-top: none; border-radius: 0 0 var(--radius) var(--radius); z-index: 50; max-height: 200px; overflow-y: auto; display: none; }
+.autocomplete-list.open { display: block; }
+.autocomplete-item { padding: 10px 14px; font-size: 14px; cursor: pointer; border-bottom: 1px solid var(--border); }
+.autocomplete-item:hover { background: rgba(232,255,60,0.1); color: var(--accent); }
+.job-badge { display: inline-block; font-family: 'DM Mono', monospace; font-size: 11px; background: rgba(232,255,60,0.1); border: 1px solid rgba(232,255,60,0.3); color: var(--accent); padding: 4px 10px; border-radius: 999px; margin-top: 6px; }
 
-  /* ENTRIES */
-  .entries-section {
-    padding: 24px 20px 0;
-    max-width: 500px;
-    margin: 0 auto;
-  }
-  .entries-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .section-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-  }
-  .filter-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
-  .filter-btn {
-    padding: 6px 14px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--muted);
-    font-size: 12px;
-    font-family: 'DM Mono', monospace;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .filter-btn.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(232,255,60,0.06);
-  }
-  .export-btn {
-    padding: 8px 16px;
-    border-radius: var(--radius);
-    border: 1px solid var(--accent);
-    background: transparent;
-    color: var(--accent);
-    font-size: 13px;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.15s;
-  }
-  .export-btn:active { background: rgba(232,255,60,0.1); }
+.toggle-group { display: flex; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.toggle-group button { flex: 1; padding: 11px 10px; border: none; background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.toggle-group button.active { background: var(--accent); color: #000; }
 
-  .entry-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    position: relative;
-    transition: border-color 0.2s;
-  }
-  .entry-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
-  .entry-project {
-    font-weight: 500;
-    font-size: 15px;
-    flex: 1;
-  }
-  .entry-hours {
-    font-family: 'DM Mono', monospace;
-    font-size: 18px;
-    font-weight: 500;
-    color: var(--accent);
-    white-space: nowrap;
-  }
-  .entry-meta {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 6px;
-  }
-  .tag {
-    font-size: 11px;
-    padding: 3px 9px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-  }
-  .tag.job { border-color: #4a9eff; color: #4a9eff; }
-  .tag.proposal { border-color: #ff9f4a; color: #ff9f4a; }
-  .tag.structural { border-color: var(--accent2); color: var(--accent2); }
-  .tag.architectural { border-color: #c084fc; color: #c084fc; }
-  .tag.construction { border-color: #fb7185; color: #fb7185; }
-  .entry-notes {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.5;
-  }
-  .entry-date {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 8px;
-  }
-  .delete-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
-    border: none;
-    color: var(--border);
-    font-size: 16px;
-    cursor: pointer;
-    padding: 4px;
-    line-height: 1;
-    transition: color 0.15s;
-  }
-  .delete-btn:hover { color: var(--red); }
+/* BUDGET PANEL */
+.budget-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; display: none; }
+.budget-panel.visible { display: block; }
+.budget-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 12px; font-weight: 500; }
+.budget-numbers { display: flex; justify-content: space-between; margin-bottom: 12px; }
+.budget-num { text-align: center; }
+.budget-num .val { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 500; }
+.budget-num .lbl { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.green { color: var(--accent2) !important; }
+.yellow { color: var(--yellow) !important; }
+.red { color: var(--red) !important; }
+.slider-track { height: 10px; background: var(--surface2); border-radius: 999px; overflow: hidden; margin-bottom: 6px; border: 1px solid var(--border); }
+.slider-fill { height: 100%; border-radius: 999px; transition: width 0.5s ease, background 0.3s; }
+.slider-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
 
-  .empty-state {
-    text-align: center;
-    color: var(--muted);
-    font-size: 14px;
-    padding: 40px 20px;
-  }
-  .empty-state .icon { font-size: 36px; margin-bottom: 12px; }
+/* VOICE */
+.voice-section { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 20px; padding-top: 4px; }
+.ai-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; background: rgba(232,255,60,0.1); border: 1px solid rgba(232,255,60,0.3); color: var(--accent); padding: 3px 8px; border-radius: 999px; font-family: 'DM Mono', monospace; }
+.voice-ring { position: relative; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.voice-ring::before { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--border); transition: all 0.3s; }
+.voice-ring.listening::before { border-color: var(--accent); animation: pulse 1.2s ease infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 8px rgba(232,255,60,0.08); } 50% { box-shadow: 0 0 0 18px rgba(232,255,60,0.04); } }
+#voiceBtn { width: 76px; height: 76px; border-radius: 50%; background: var(--surface2); border: 2px solid var(--border); color: var(--text); font-size: 28px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.voice-ring.listening #voiceBtn { background: var(--accent); border-color: var(--accent); color: #000; }
+.voice-hint { font-size: 12px; color: var(--muted); text-align: center; max-width: 280px; line-height: 1.6; }
+.voice-transcript { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent2); width: 100%; line-height: 1.5; display: none; }
+.voice-transcript.visible { display: block; }
+.paste-btn { background: var(--surface2); border: 1px solid var(--accent2); color: var(--accent2); padding: 8px 18px; border-radius: 999px; font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; }
+.paste-box { width: 100%; display: none; }
+.paste-box textarea { border-color: var(--accent2); margin-bottom: 8px; }
+.parse-btn { width: 100%; padding: 11px; border-radius: var(--radius); border: none; background: var(--accent2); color: #000; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; }
 
-  .total-bar {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 16px;
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 16px;
-    font-size: 13px;
-  }
-  .total-bar span { color: var(--muted); }
-  .total-bar strong { font-family: 'DM Mono', monospace; color: var(--accent); font-size: 16px; }
+#submitBtn { width: 100%; padding: 15px; border-radius: var(--radius); border: none; background: var(--accent); color: #000; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 6px; }
+#cancelEditBtn { width: 100%; padding: 12px; border-radius: var(--radius); border: 1px solid var(--border); background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; margin-top: 8px; display: none; }
 
-  /* TOAST */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: var(--accent);
-    color: #000;
-    padding: 12px 24px;
-    border-radius: 999px;
-    font-weight: 500;
-    font-size: 14px;
-    z-index: 999;
-    transition: transform 0.3s ease;
-    white-space: nowrap;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+/* ENTRIES */
+.entries-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.section-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+.filter-row { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.filter-btn { padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 12px; font-family: 'DM Mono', monospace; cursor: pointer; transition: all 0.15s; }
+.filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(232,255,60,0.06); }
+.total-bar { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; display: flex; justify-content: space-between; margin-bottom: 14px; font-size: 13px; }
+.total-bar span { color: var(--muted); }
+.total-bar strong { font-family: 'DM Mono', monospace; color: var(--accent); font-size: 16px; }
+.export-btn { padding: 8px 14px; border-radius: var(--radius); border: 1px solid var(--accent); background: transparent; color: var(--accent); font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; }
 
-  .ai-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 10px;
-    background: rgba(232,255,60,0.1);
-    border: 1px solid rgba(232,255,60,0.3);
-    color: var(--accent);
-    padding: 3px 8px;
-    border-radius: 999px;
-    margin-bottom: 12px;
-    font-family: 'DM Mono', monospace;
-  }
+.entry-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 4px; position: relative; cursor: pointer; transition: border-color 0.2s; }
+.entry-card:hover { border-color: var(--accent); }
+.entry-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+.entry-project { font-weight: 500; font-size: 15px; flex: 1; }
+.entry-hours { font-family: 'DM Mono', monospace; font-size: 18px; color: var(--accent); white-space: nowrap; }
+.entry-sub { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.entry-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.tag { font-size: 10px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); font-family: 'DM Mono', monospace; }
+.tag.job { border-color: #4a9eff; color: #4a9eff; }
+.tag.proposal { border-color: #ff9f4a; color: #ff9f4a; }
+.tag.structural { border-color: var(--accent2); color: var(--accent2); }
+.tag.architectural { border-color: #c084fc; color: #c084fc; }
+.tag.construction { border-color: #fb7185; color: #fb7185; }
+.entry-notes { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.entry-date { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 8px; }
+.delete-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--border); font-size: 14px; cursor: pointer; padding: 4px; transition: color 0.15s; }
+.delete-btn:hover { color: var(--red); }
+.edit-hint { font-size: 10px; color: var(--border); text-align: right; margin-bottom: 8px; font-family: 'DM Mono', monospace; padding-right: 4px; }
+.empty-state { text-align: center; color: var(--muted); font-size: 14px; padding: 40px 20px; }
 
-  .field-row { display: flex; gap: 12px; }
-  .field-row > div { flex: 1; }
+/* MANAGER */
+.upload-box { border: 2px dashed var(--border); border-radius: var(--radius); padding: 24px; text-align: center; cursor: pointer; transition: border-color 0.2s; margin-bottom: 14px; }
+.upload-box:hover { border-color: var(--accent); }
+.upload-box input { display: none; }
+.upload-icon { font-size: 28px; margin-bottom: 8px; }
+.upload-box p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.upload-box .fname { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent2); margin-top: 6px; }
+.project-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 8px; }
+.project-item .pname { font-weight: 500; font-size: 14px; }
+.project-item .pjob { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); margin-top: 2px; }
+.project-item .pphase { font-size: 12px; color: var(--muted); margin-top: 4px; padding-left: 8px; border-left: 2px solid var(--border); }
+
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--accent); color: #000; padding: 12px 24px; border-radius: 999px; font-weight: 500; font-size: 14px; z-index: 999; transition: transform 0.3s ease; white-space: nowrap; }
+.toast.show { transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 
+<!-- SETUP -->
+<div class="setup-overlay" id="setupOverlay">
+  <div class="logo2">Time<span>LOG</span></div>
+  <p>Enter your name to get started. It will be saved on this device.</p>
+  <input type="text" id="setupName" placeholder="Your full name" autocomplete="name">
+  <button class="setup-btn" onclick="saveSetup()">Get Started →</button>
+</div>
+
 <header>
   <div class="logo">Time<span>LOG</span></div>
-  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
-    <div class="date-pill" id="headerDate"></div>
-    <div id="syncStatus" style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;"></div>
+  <div class="header-right">
+    <div class="date-pill" id="headerDate">Sun, Mar 1</div>
+    <div id="syncStatus" style="color: var(--accent2);">✓ Synced</div>
   </div>
 </header>
 
-<!-- VOICE SECTION -->
-<div class="voice-section">
-  <div class="ai-badge">✦ AI Voice Input</div>
-  <div class="voice-ring" id="voiceRing" onclick="toggleVoice()" style="cursor:pointer;">
-    <button id="voiceBtn">🎤</button>
-  </div>
-  <p class="voice-hint">Tap the mic and say something like: <em>"2.5 hours on Creekside Apartments, job, structural engineering, reviewed shear wall calculations"</em></p>
-  <div class="voice-transcript" id="transcript"></div>
-  <button id="pasteVoiceBtn" onclick="openVoicePaste()" style="background:var(--surface2);border:1px solid var(--accent2);color:var(--accent2);padding:10px 20px;border-radius:999px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;">
-    📋 Samsung? Use keyboard mic instead
-  </button>
-  <div id="voicePasteBox" style="display:none;width:100%;max-width:400px;padding:0 20px;">
-    <p style="font-size:12px;color:var(--muted);margin-bottom:8px;text-align:center;">Tap the mic icon on your Samsung keyboard, speak, then tap Parse</p>
-    <textarea id="voicePasteInput" placeholder="Speak using your keyboard mic, then tap Parse..." style="width:100%;background:var(--surface);border:1px solid var(--accent2);border-radius:12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;padding:12px 14px;outline:none;min-height:80px;resize:vertical;"></textarea>
-    <button onclick="parsePastedVoice()" style="width:100%;margin-top:8px;padding:12px;border-radius:12px;border:none;background:var(--accent2);color:#000;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">
-      ✦ Parse This Text
-    </button>
-  </div>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(&#39;log&#39;)">Log Time</div>
+  <div class="tab" onclick="switchTab(&#39;entries&#39;)">My Entries</div>
+  <div class="tab" onclick="switchTab(&#39;manager&#39;)">Manager</div>
 </div>
 
-<!-- FORM -->
-<div class="form-section">
+<!-- LOG TIME -->
+<div class="panel active" id="panel-log">
+  <div class="voice-section">
+    <div class="ai-badge">✦ AI Voice Input</div>
+    <div class="voice-ring" id="voiceRing" onclick="toggleVoice()">
+      <button id="voiceBtn">🎤</button>
+    </div>
+    <p class="voice-hint">Say: <em>"2.5 hours, Creekside, 6 Apartments, Structural Engineering, job, reviewed shear wall calcs"</em></p>
+    <div class="voice-transcript" id="transcript"></div>
+    <button class="paste-btn" onclick="openVoicePaste()">📋 Samsung? Use keyboard mic</button>
+    <div class="paste-box" id="voicePasteBox">
+      <textarea id="voicePasteInput" placeholder="Speak using your keyboard mic, then tap Parse..."></textarea>
+      <button class="parse-btn" onclick="parsePastedVoice()">✦ Parse This Text</button>
+    </div>
+  </div>
 
-  <div>
+  <div class="form-group">
     <label>Date</label>
     <input type="date" id="entryDate">
   </div>
 
-  <div>
-    <label>Project Name</label>
-    <input type="text" id="projectName" placeholder="e.g. Creekside Apartments">
+  <div class="form-group">
+    <label>Project</label>
+    <div class="autocomplete-wrap">
+      <input type="text" id="projectName" placeholder="Type or speak project name..." oninput="projectAutocomplete(this.value)" autocomplete="off">
+      <div class="autocomplete-list" id="projectDropdown"></div>
+    </div>
+    <div id="jobBadge" style="display:none" class="job-badge"></div>
   </div>
 
   <div class="field-row">
-    <div>
+    <div class="form-group">
+      <label>Sub-Phase</label>
+      <select id="subPhase" onchange="onSubPhaseChange()">
+        <option value="">— Select —</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Work Type</label>
+      <select id="workType" onchange="updateBudgetPanel()">
+        <option value="">— Select —</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="budget-panel" id="budgetPanel">
+    <div class="budget-title">📊 Budget — <span id="bpWorkType"></span></div>
+    <div class="budget-numbers">
+      <div class="budget-num">
+        <div class="val" id="bpLogged">—</div>
+        <div class="lbl">Hrs Logged</div>
+      </div>
+      <div class="budget-num">
+        <div class="val" id="bpAllotted">—</div>
+        <div class="lbl">Allotted Hrs</div>
+      </div>
+      <div class="budget-num">
+        <div class="val" id="bpRemaining">—</div>
+        <div class="lbl">Remaining</div>
+      </div>
+      <div class="budget-num">
+        <div class="val" id="bpDollar">—</div>
+        <div class="lbl">$ Budget</div>
+      </div>
+    </div>
+    <div class="slider-track">
+      <div class="slider-fill" id="bpSlider" style="width:0%"></div>
+    </div>
+    <div class="slider-labels">
+      <span>0%</span><span id="bpPct">0%</span><span>100%</span>
+    </div>
+  </div>
+
+  <div class="field-row">
+    <div class="form-group">
       <label>Hours</label>
       <input type="number" id="hours" placeholder="0.0" step="0.25" min="0">
     </div>
-    <div>
-      <label>Type</label>
+    <div class="form-group">
+      <label>Job / Proposal</label>
       <div class="toggle-group">
-        <button class="active" id="btnJob" onclick="setType('Job')">Job</button>
-        <button id="btnProposal" onclick="setType('Proposal')">Proposal</button>
+        <button class="active" id="btnJob" onclick="setType(&#39;Job&#39;)">Job</button>
+        <button id="btnProposal" onclick="setType(&#39;Proposal&#39;)">Proposal</button>
       </div>
     </div>
   </div>
 
-  <div>
-    <label>Work Type</label>
-    <div class="chip-group">
-      <div class="chip" onclick="setWork(this,'Structural Engineering')">Structural Engineering</div>
-      <div class="chip" onclick="setWork(this,'Architectural Design')">Architectural Design</div>
-      <div class="chip" onclick="setWork(this,'Construction Management')">Construction Management</div>
-    </div>
-  </div>
-
-  <div>
+  <div class="form-group">
     <label>Notes</label>
-    <textarea id="notes" placeholder="Describe what you worked on..."></textarea>
+    <textarea id="notes" placeholder="What did you work on?"></textarea>
   </div>
 
   <button id="submitBtn" onclick="saveEntry()">+ Log Time</button>
+  <button id="cancelEditBtn" onclick="cancelEdit()">✕ Cancel Edit</button>
 </div>
 
 <!-- ENTRIES -->
-<div class="entries-section">
-  <hr class="divider">
+<div class="panel" id="panel-entries">
   <div class="entries-header">
-    <div class="section-title">Entries</div>
-    <button class="export-btn" onclick="exportExcel()">⬇ Export Excel</button>
+    <div class="section-title">My Entries</div>
+    <button class="export-btn" onclick="exportCSV()">⬇ Export</button>
   </div>
-
   <div class="filter-row">
-    <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
-    <button class="filter-btn" onclick="setFilter('today',this)">Today</button>
-    <button class="filter-btn" onclick="setFilter('week',this)">This Week</button>
-    <button class="filter-btn" onclick="setFilter('month',this)">This Month</button>
-    <button class="filter-btn" onclick="setFilter('year',this)">This Year</button>
+    <button class="filter-btn active" onclick="setFilter(&#39;all&#39;,this)">All</button>
+    <button class="filter-btn" onclick="setFilter(&#39;today&#39;,this)">Today</button>
+    <button class="filter-btn" onclick="setFilter(&#39;week&#39;,this)">This Week</button>
+    <button class="filter-btn" onclick="setFilter(&#39;month&#39;,this)">This Month</button>
+    <button class="filter-btn" onclick="setFilter(&#39;year&#39;,this)">This Year</button>
   </div>
-
   <div class="total-bar">
     <span>Total Hours</span>
     <strong id="totalHours">0.00</strong>
   </div>
+  <div id="entriesList"><div class="empty-state"><div style="font-size:36px;margin-bottom:12px">⏱</div>No entries for this period</div></div>
+</div>
 
-  <div id="entriesList"></div>
+<!-- MANAGER -->
+<div class="panel" id="panel-manager">
+  <div class="section-title">Manager Setup</div>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">
+    Upload weekly Ajera exports (<strong>.xlsx</strong>) to sync project data and budgets.
+  </p>
+
+  <label style="margin-bottom:8px;display:block;">① Phases Report — project budgets</label>
+  <div class="upload-box" onclick="document.getElementById(&#39;phasesFile&#39;).click()">
+    <input type="file" id="phasesFile" accept=".xlsx" onchange="uploadPhases(this)">
+    <div class="upload-icon">📋</div>
+    <p>Tap to upload <strong>Phases_YYYYMMDD.xlsx</strong></p>
+    <div class="fname" id="phasesFileName"></div>
+  </div>
+
+  <label style="margin-bottom:8px;display:block;">② Transactions Report — hours already logged</label>
+  <div class="upload-box" onclick="document.getElementById(&#39;transFile&#39;).click()">
+    <input type="file" id="transFile" accept=".xlsx" onchange="uploadTransactions(this)">
+    <div class="upload-icon">⏱</div>
+    <p>Tap to upload <strong>Transactions_YYYYMMDD.xlsx</strong></p>
+    <div class="fname" id="transFileName"></div>
+  </div>
+
+  <div id="projectListDisplay"></div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ── STATE ──────────────────────────────────────────────────────────────────
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHuYm5-A1TP8-mRO6zwEOvGkYfa3_6dKGBjXwM6HjC3ogmjKUqqRdV9D_Nmw2BL0mSOw/exec';
-let entries = JSON.parse(localStorage.getItem('timelog_entries') || '[]');
-let currentType = 'Job';
-let currentWork = '';
-let currentFilter = 'all';
-let recognition = null;
-let isListening = false;
-let syncing = false;
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzE9NFnFMlqxc90NW2ygnBhbs-TjMxZ174I5G5bLOijD54JuEtsPPYJrbK6LM0oHR_J_g/exec';
 
-// ── INIT ───────────────────────────────────────────────────────────────────
+let entries      = JSON.parse(localStorage.getItem('timelog_entries')      || '[]');
+let projects     = JSON.parse(localStorage.getItem('timelog_projects')     || '[]');
+let transactions = JSON.parse(localStorage.getItem('timelog_transactions') || '[]');
+let currentType  = 'Job';
+let currentFilter = 'all';
+let recognition  = null;
+let isListening  = false;
+let editingId    = null;
+let employeeName = localStorage.getItem('timelog_name') || '';
+
+// ── INIT ──────────────────────────────────────────────────────────────────
 function init() {
+  if (employeeName) document.getElementById('setupOverlay').style.display = 'none';
   const today = new Date();
-  document.getElementById('headerDate').textContent = today.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+  document.getElementById('headerDate').textContent =
+    today.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
   document.getElementById('entryDate').value = today.toISOString().split('T')[0];
-  renderEntries();
   setupSpeech();
+  renderEntries();
+  renderProjectList();
   syncFromSheet();
 }
 
-// ── GOOGLE SHEETS SYNC ─────────────────────────────────────────────────────
-function setSyncStatus(msg, color) {
-  const el = document.getElementById('syncStatus');
-  if (el) { el.textContent = msg; el.style.color = color || 'var(--muted)'; }
+function saveSetup() {
+  const n = document.getElementById('setupName').value.trim();
+  if (!n) { showToast('Please enter your name.'); return; }
+  employeeName = n;
+  localStorage.setItem('timelog_name', n);
+  document.getElementById('setupOverlay').style.display = 'none';
+  showToast('Welcome, ' + n.split(' ')[0] + '!');
 }
 
-function syncFromSheet() {
-  setSyncStatus('⟳ Syncing…', 'var(--accent)');
-  fetch(SCRIPT_URL)
-    .then(r => r.json())
-    .then(data => {
-      if (data.status === 'ok' && data.entries) {
-        // Merge: sheet is source of truth, keep any local entries not yet synced
-        entries = data.entries.map(e => ({
-          id: Number(e.id), date: e.date, project: e.project,
-          type: e.type, workType: e.workType,
-          hours: Number(e.hours), notes: e.notes || ''
-        }));
-        entries.sort((a,b) => b.id - a.id);
-        localStorage.setItem('timelog_entries', JSON.stringify(entries));
-        renderEntries();
-        setSyncStatus('✓ Synced with Google Sheets', 'var(--accent2)');
-      }
-    })
-    .catch(() => setSyncStatus('⚠ Offline — data saved locally', 'var(--red)'));
+// ── TABS ──────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  ['log','entries','manager'].forEach((t, i) => {
+    document.querySelectorAll('.tab')[i].classList.toggle('active', t === tab);
+    document.getElementById('panel-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'entries') renderEntries();
 }
 
-function pushEntryToSheet(entry) {
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'save', ...entry })
-  }).catch(() => {});
+// ── PROJECT AUTOCOMPLETE ──────────────────────────────────────────────────
+function projectAutocomplete(val) {
+  clearProjectUI();
+  if (!val || val.length < 2) { document.getElementById('projectDropdown').classList.remove('open'); return; }
+  const matches = projects.filter(p => p.name.toLowerCase().includes(val.toLowerCase()));
+  if (!matches.length) { document.getElementById('projectDropdown').classList.remove('open'); return; }
+  document.getElementById('projectDropdown').innerHTML = matches.map(p =>
+    `<div class="autocomplete-item" onclick="selectProject(${JSON.stringify(p.name)})">
+      <strong>${p.name}</strong>
+      <span style="float:right;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">${p.jobNumber}</span>
+    </div>`
+  ).join('');
+  document.getElementById('projectDropdown').classList.add('open');
 }
 
-function deleteEntryFromSheet(id) {
-  fetch(SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'delete', id: id })
-  }).catch(() => {});
+function clearProjectUI() {
+  document.getElementById('jobBadge').style.display = 'none';
+  document.getElementById('subPhase').innerHTML = '<option value="">— Select —</option>';
+  document.getElementById('workType').innerHTML = '<option value="">— Select —</option>';
+  document.getElementById('budgetPanel').classList.remove('visible');
 }
 
-// ── VOICE ──────────────────────────────────────────────────────────────────
+function selectProject(name) {
+  const project = projects.find(p => p.name === name);
+  if (!project) return;
+  document.getElementById('projectName').value = name;
+  document.getElementById('projectDropdown').classList.remove('open');
+  const badge = document.getElementById('jobBadge');
+  badge.textContent = '# ' + project.jobNumber;
+  badge.style.display = 'inline-block';
+  const sp = document.getElementById('subPhase');
+  sp.innerHTML = '<option value="">— Select —</option>';
+  [...new Set(project.phases.map(p => p.subPhase))].forEach(s => {
+    const o = document.createElement('option'); o.value = s; o.textContent = s; sp.appendChild(o);
+  });
+  document.getElementById('workType').innerHTML = '<option value="">— Select —</option>';
+  document.getElementById('budgetPanel').classList.remove('visible');
+}
+
+function onSubPhaseChange() {
+  const name = document.getElementById('projectName').value;
+  const subPhase = document.getElementById('subPhase').value;
+  const project = projects.find(p => p.name === name);
+  const wt = document.getElementById('workType');
+  wt.innerHTML = '<option value="">— Select —</option>';
+  document.getElementById('budgetPanel').classList.remove('visible');
+  if (!project || !subPhase) return;
+  project.phases.filter(p => p.subPhase === subPhase).forEach(p => {
+    const o = document.createElement('option'); o.value = p.workType; o.textContent = p.workType; wt.appendChild(o);
+  });
+}
+
+function updateBudgetPanel() {
+  const name     = document.getElementById('projectName').value;
+  const subPhase = document.getElementById('subPhase').value;
+  const workType = document.getElementById('workType').value;
+  const project  = projects.find(p => p.name === name);
+  if (!project || !subPhase || !workType) { document.getElementById('budgetPanel').classList.remove('visible'); return; }
+  const phase = project.phases.find(p => p.subPhase === subPhase && p.workType === workType);
+  if (!phase) return;
+
+  // Billable rate = average (spent/hours) from transactions for this employee
+  const myTrans = transactions.filter(t => t.employee === employeeName && t.hours > 0 && t.spent > 0);
+  const billableRate = myTrans.length > 0
+    ? myTrans.reduce((s,t) => s + t.spent / t.hours, 0) / myTrans.length : 0;
+
+  // Hours already in Ajera for this employee + phase + worktype
+  const ajeraHrs = transactions
+    .filter(t => t.employee === employeeName && t.subPhase === subPhase && t.workType === workType)
+    .reduce((s,t) => s + t.hours, 0);
+
+  // Hours from this app for this employee + project + subphase + worktype
+  const appHrs = entries
+    .filter(e => (e.employee || '') === employeeName && e.project === name && e.subPhase === subPhase && e.workType === workType)
+    .reduce((s,e) => s + e.hours, 0);
+
+  const totalLogged  = ajeraHrs + appHrs;
+  const dollarBudget = phase.budget;
+  const allottedHrs  = billableRate > 0 ? dollarBudget / billableRate : 0;
+  const remaining    = Math.max(0, allottedHrs - totalLogged);
+  const pct          = allottedHrs > 0 ? Math.min((totalLogged / allottedHrs) * 100, 100) : 0;
+
+  let color = 'var(--accent2)', cls = 'green';
+  if (pct >= 90) { color = 'var(--red)'; cls = 'red'; }
+  else if (pct >= 70) { color = 'var(--yellow)'; cls = 'yellow'; }
+
+  document.getElementById('bpWorkType').textContent   = workType;
+  document.getElementById('bpLogged').textContent     = totalLogged.toFixed(1) + 'h';
+  document.getElementById('bpLogged').className       = 'val ' + cls;
+  document.getElementById('bpAllotted').textContent   = allottedHrs > 0 ? allottedHrs.toFixed(1) + 'h' : '—';
+  document.getElementById('bpRemaining').textContent  = allottedHrs > 0 ? remaining.toFixed(1) + 'h' : '—';
+  document.getElementById('bpRemaining').className    = 'val ' + cls;
+  document.getElementById('bpDollar').textContent     = dollarBudget > 0 ? '$' + dollarBudget.toLocaleString() : '—';
+  document.getElementById('bpSlider').style.width     = pct + '%';
+  document.getElementById('bpSlider').style.background = color;
+  document.getElementById('bpPct').textContent        = pct.toFixed(0) + '%';
+  document.getElementById('budgetPanel').classList.add('visible');
+}
+
+// ── VOICE ─────────────────────────────────────────────────────────────────
 function setupSpeech() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) {
-    showTranscript('⚠️ Speech Recognition not available in this browser. Try Chrome on Android.');
-    document.getElementById('voiceBtn').style.opacity = '0.4';
-    document.getElementById('voiceBtn').disabled = true;
-    return;
-  }
+  if (!SR) return;
   recognition = new SR();
-  recognition.continuous = false;
-  recognition.interimResults = true;
-  recognition.lang = 'en-US';
-
-  recognition.onresult = (e) => {
-    const interim = Array.from(e.results).map(r => r[0].transcript).join(' ');
-    showTranscript(interim);
-    if (e.results[e.results.length - 1].isFinal) {
-      parseVoice(interim);
-    }
+  recognition.continuous = false; recognition.interimResults = true; recognition.lang = 'en-US';
+  recognition.onresult = e => {
+    const txt = Array.from(e.results).map(r => r[0].transcript).join(' ');
+    showTranscript(txt);
+    if (e.results[e.results.length-1].isFinal) parseVoice(txt);
   };
   recognition.onend = () => stopListening();
-  recognition.onerror = (e) => {
+  recognition.onerror = e => {
     stopListening();
-    const msgs = {
-      'not-allowed': '🚫 Microphone blocked. Go to Chrome Settings > Site Settings > Microphone and allow this site.',
-      'no-speech': '🎤 No speech detected. Tap mic and speak clearly.',
-      'network': '🌐 Network error with speech service. Check your connection.',
-      'aborted': '⏹ Stopped.',
-      'audio-capture': '🎤 No microphone found on this device.',
-      'service-not-allowed': '🚫 Speech service not allowed. Make sure you are on HTTPS.'
-    };
-    showTranscript(msgs[e.error] || '⚠️ Error: ' + e.error + '. Try again.');
+    showTranscript({ 'not-allowed':'🚫 Mic blocked.', 'no-speech':'No speech detected.' }[e.error] || '⚠ ' + e.error);
   };
 }
 
 function showTranscript(msg) {
-  const t = document.getElementById('transcript');
-  t.textContent = msg;
-  t.classList.add('visible');
+  const t = document.getElementById('transcript'); t.textContent = msg; t.classList.add('visible');
 }
 
 function toggleVoice() {
-  // Immediate visual feedback so we know the tap registered
-  showTranscript('⏳ Tap registered — starting mic…');
-
-  if (isListening) {
-    stopListening();
-    return;
-  }
-
-  if (!recognition) {
-    showTranscript('⚠️ Speech not supported. Use Chrome on Android.');
-    return;
-  }
-
-  // Request mic permission first, then start recognition in the callback
+  if (isListening) { stopListening(); return; }
+  showTranscript('⏳ Starting mic...');
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(function(stream) {
-        stream.getTracks().forEach(function(t) { t.stop(); }); // release stream, SR handles its own
-        startListening();
-      })
-      .catch(function(err) {
-        showTranscript('🚫 Mic blocked: ' + err.message + '. Tap the lock icon in your browser address bar → Permissions → allow Microphone.');
-      });
-  } else {
-    // Fallback: try starting directly
-    startListening();
-  }
+      .then(s => { s.getTracks().forEach(t => t.stop()); startListening(); })
+      .catch(() => showTranscript('🚫 Mic blocked. Tap "Samsung? Use keyboard mic" below.'));
+  } else { startListening(); }
 }
 
 function startListening() {
+  if (!recognition) { showTranscript('⚠ Not supported. Use keyboard mic.'); return; }
   isListening = true;
   document.getElementById('voiceRing').classList.add('listening');
-  showTranscript('🎤 Listening… speak now');
-  try {
-    recognition.start();
-  } catch(e) {
-    stopListening();
-    showTranscript('⚠️ Error starting mic: ' + e.message);
-  }
+  showTranscript('🎤 Listening — speak now');
+  try { recognition.start(); } catch(e) { stopListening(); showTranscript('⚠ ' + e.message); }
 }
 
 function stopListening() {
@@ -672,115 +498,168 @@ function stopListening() {
   try { recognition.stop(); } catch(e) {}
 }
 
+function openVoicePaste() {
+  const b = document.getElementById('voicePasteBox');
+  b.style.display = b.style.display === 'block' ? 'none' : 'block';
+}
+
+function parsePastedVoice() {
+  const t = document.getElementById('voicePasteInput').value.trim();
+  if (!t) return;
+  showTranscript('Parsing: ' + t);
+  document.getElementById('voicePasteBox').style.display = 'none';
+  document.getElementById('voicePasteInput').value = '';
+  parseVoice(t);
+}
+
 function parseVoice(text) {
   const t = text.toLowerCase();
 
-  // Hours: "2.5 hours", "two and a half hours", "45 minutes"
-  let hours = null;
-  const hrMatch = t.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?)/);
-  const minMatch = t.match(/(\d+)\s*minutes?/);
-  if (hrMatch) hours = parseFloat(hrMatch[1]);
-  else if (minMatch) hours = Math.round(parseFloat(minMatch[1]) / 0.25 * 0.25 * 100) / 100 / 1;
-  if (minMatch && hrMatch) hours = parseFloat(hrMatch[1]) + parseFloat(minMatch[1]) / 60;
-  if (hours !== null) document.getElementById('hours').value = Math.round(hours * 4) / 4;
+  // Hours
+  const hrM = t.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?)/);
+  const minM = t.match(/(\d+)\s*minutes?/);
+  let hrs = hrM ? parseFloat(hrM[1]) : 0;
+  if (minM) hrs += parseFloat(minM[1]) / 60;
+  if (hrs > 0) document.getElementById('hours').value = Math.round(hrs * 4) / 4;
 
   // Type
   if (t.includes('proposal')) setType('Proposal');
-  else if (t.includes('job')) setType('Job');
+  else setType('Job');
+
+  // Project match
+  let best = null, bestScore = 0;
+  projects.forEach(p => {
+    const score = p.name.toLowerCase().split(' ').filter(w => w.length > 3 && t.includes(w)).length;
+    if (score > bestScore) { bestScore = score; best = p; }
+  });
+  if (best && bestScore > 0) { document.getElementById('projectName').value = best.name; selectProject(best.name); }
+
+  // Sub-phase
+  const spSel = document.getElementById('subPhase');
+  if (t.includes('apartment') || t.includes('unit')) {
+    for (let o of spSel.options) { if (o.value.toLowerCase().includes('apart')) { spSel.value = o.value; onSubPhaseChange(); break; } }
+  } else if (t.includes('clubhouse')) {
+    for (let o of spSel.options) { if (o.value.toLowerCase().includes('club')) { spSel.value = o.value; onSubPhaseChange(); break; } }
+  }
 
   // Work type
-  if (t.includes('structural')) setWork(document.querySelector('[onclick*="Structural"]'), 'Structural Engineering');
-  else if (t.includes('architect')) setWork(document.querySelector('[onclick*="Architectural"]'), 'Architectural Design');
-  else if (t.includes('construction') || t.includes('cm')) setWork(document.querySelector('[onclick*="Construction"]'), 'Construction Management');
-
-  // Date
-  if (t.includes('today')) document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
-  else if (t.includes('yesterday')) {
-    const y = new Date(); y.setDate(y.getDate() - 1);
-    document.getElementById('entryDate').value = y.toISOString().split('T')[0];
+  const wtSel = document.getElementById('workType');
+  if (t.includes('structural') || t.includes('structure')) {
+    for (let o of wtSel.options) { if (o.value.toLowerCase().includes('struct')) { wtSel.value = o.value; updateBudgetPanel(); break; } }
+  } else if (t.includes('architect')) {
+    for (let o of wtSel.options) { if (o.value.toLowerCase().includes('arch')) { wtSel.value = o.value; updateBudgetPanel(); break; } }
+  } else if (t.includes('construction')) {
+    for (let o of wtSel.options) { if (o.value.toLowerCase().includes('construct')) { wtSel.value = o.value; updateBudgetPanel(); break; } }
   }
 
-  // Project name — extract meaningful phrase (heuristic)
-  let proj = '';
-  const projPatterns = [
-    /(?:on|for|project)\s+([a-z0-9 \-]+?)(?:\s+(?:job|proposal|structural|architect|construction|hours|for|\d))/i,
-    /(?:on|for|project)\s+([a-z0-9 \-]+?)(?:\s*[,.]|$)/i
-  ];
-  for (const rx of projPatterns) {
-    const m = text.match(rx);
-    if (m) { proj = m[1].trim(); break; }
-  }
-  if (proj.length > 2) document.getElementById('projectName').value = toTitleCase(proj);
-
-  // Notes — use most of the transcript minus recognized commands
-  let notes = text;
-  notes = notes.replace(/\d+(?:\.\d+)?\s*(?:hours?|hrs?)/gi, '');
-  notes = notes.replace(/\d+\s*minutes?/gi, '');
-  notes = notes.replace(/\b(job|proposal|structural engineering|architectural design|construction management|today|yesterday)\b/gi, '');
-  notes = notes.replace(/(?:on|for)\s+[a-z0-9 \-]+(?=[,\.]|$)/i, '');
-  notes = notes.replace(/\s{2,}/g, ' ').trim();
+  // Notes — strip commands
+  let notes = text
+    .replace(/\d+(?:\.\d+)?\s*(?:hours?|hrs?)/gi, '')
+    .replace(/\d+\s*minutes?/gi, '')
+    .replace(/\b(job|proposal|structural engineering|structure engineering services|architectural design|construction management|today|yesterday|apartments?|clubhouse)\b/gi, '')
+    .replace(/\s{2,}/g, ' ').trim();
   if (notes.length > 4) document.getElementById('notes').value = notes;
-
-  showToast('Voice parsed! Review & confirm below.');
+  showToast('Voice parsed — review & confirm');
 }
 
-function toTitleCase(s) {
-  return s.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
-}
-
-// ── FORM CONTROLS ──────────────────────────────────────────────────────────
+// ── FORM ──────────────────────────────────────────────────────────────────
 function setType(t) {
   currentType = t;
   document.getElementById('btnJob').classList.toggle('active', t === 'Job');
   document.getElementById('btnProposal').classList.toggle('active', t === 'Proposal');
 }
 
-function setWork(el, w) {
-  currentWork = w;
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  if (el) el.classList.add('active');
-}
-
-// ── SAVE ───────────────────────────────────────────────────────────────────
 function saveEntry() {
-  const project = document.getElementById('projectName').value.trim();
-  const hours = parseFloat(document.getElementById('hours').value);
-  const date = document.getElementById('entryDate').value;
-  const notes = document.getElementById('notes').value.trim();
+  const project  = document.getElementById('projectName').value.trim();
+  const subPhase = document.getElementById('subPhase').value;
+  const workType = document.getElementById('workType').value;
+  const hours    = parseFloat(document.getElementById('hours').value);
+  const date     = document.getElementById('entryDate').value;
+  const notes    = document.getElementById('notes').value.trim();
 
-  if (!project) { showToast('Please enter a project name.'); return; }
-  if (!hours || hours <= 0) { showToast('Please enter hours.'); return; }
-  if (!currentWork) { showToast('Please select a work type.'); return; }
-  if (!date) { showToast('Please select a date.'); return; }
+  if (!project)       { showToast('Please enter a project.'); return; }
+  if (!hours || hours <= 0) { showToast('Please enter valid hours.'); return; }
+  if (!date)          { showToast('Please select a date.'); return; }
 
-  const entry = {
-    id: Date.now(),
-    date, project, hours,
-    type: currentType,
-    workType: currentWork,
-    notes
-  };
-  entries.unshift(entry);
+  const proj = projects.find(p => p.name === project);
+  const jobNumber = proj ? proj.jobNumber : '';
+
+  if (editingId !== null) {
+    const idx = entries.findIndex(e => e.id === editingId);
+    if (idx !== -1) {
+      entries[idx] = { ...entries[idx], date, project, subPhase, workType, jobNumber, hours, type: currentType, notes };
+      updateEntryInSheet(entries[idx]);
+    }
+    editingId = null;
+    document.getElementById('submitBtn').textContent = '+ Log Time';
+    document.getElementById('cancelEditBtn').style.display = 'none';
+    showToast('✓ Entry updated!');
+  } else {
+    const entry = { id: Date.now(), date, project, subPhase, workType, jobNumber, hours, type: currentType, notes, employee: employeeName };
+    entries.unshift(entry);
+    pushEntryToSheet(entry);
+    showToast('✓ Time logged!');
+  }
+
   localStorage.setItem('timelog_entries', JSON.stringify(entries));
   clearForm();
   renderEntries();
-  showToast('✓ Time logged!');
-  pushEntryToSheet(entry);
-  setSyncStatus('⟳ Saving to Google Sheets…', 'var(--accent)');
-  setTimeout(() => setSyncStatus('✓ Synced with Google Sheets', 'var(--accent2)'), 2000);
+  updateBudgetPanel();
 }
 
 function clearForm() {
   document.getElementById('projectName').value = '';
   document.getElementById('hours').value = '';
   document.getElementById('notes').value = '';
+  document.getElementById('jobBadge').style.display = 'none';
+  document.getElementById('subPhase').innerHTML = '<option value="">— Select —</option>';
+  document.getElementById('workType').innerHTML = '<option value="">— Select —</option>';
+  document.getElementById('budgetPanel').classList.remove('visible');
+  document.getElementById('projectDropdown').classList.remove('open');
   document.getElementById('transcript').classList.remove('visible');
   document.getElementById('transcript').textContent = '';
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  currentWork = '';
 }
 
-// ── RENDER ─────────────────────────────────────────────────────────────────
+function editEntry(id) {
+  const e = entries.find(e => e.id === id);
+  if (!e) return;
+  editingId = id;
+  switchTab('log');
+  setTimeout(() => {
+    document.getElementById('entryDate').value = e.date;
+    document.getElementById('projectName').value = e.project;
+    document.getElementById('hours').value = e.hours;
+    document.getElementById('notes').value = e.notes || '';
+    setType(e.type || 'Job');
+    if (e.jobNumber) {
+      const b = document.getElementById('jobBadge'); b.textContent = '# ' + e.jobNumber; b.style.display = 'inline-block';
+    }
+    const proj = projects.find(p => p.name === e.project);
+    if (proj) {
+      const sp = document.getElementById('subPhase');
+      sp.innerHTML = '<option value="">— Select —</option>';
+      [...new Set(proj.phases.map(p => p.subPhase))].forEach(s => {
+        const o = document.createElement('option'); o.value = s; o.textContent = s; sp.appendChild(o);
+      });
+      sp.value = e.subPhase;
+      onSubPhaseChange();
+      setTimeout(() => { document.getElementById('workType').value = e.workType; updateBudgetPanel(); }, 50);
+    }
+    document.getElementById('submitBtn').textContent = '✓ Save Changes';
+    document.getElementById('cancelEditBtn').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    showToast('Editing — make changes and save');
+  }, 100);
+}
+
+function cancelEdit() {
+  editingId = null;
+  document.getElementById('submitBtn').textContent = '+ Log Time';
+  document.getElementById('cancelEditBtn').style.display = 'none';
+  clearForm();
+}
+
+// ── ENTRIES ───────────────────────────────────────────────────────────────
 function setFilter(f, btn) {
   currentFilter = f;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -789,156 +668,234 @@ function setFilter(f, btn) {
 }
 
 function filterEntries() {
-  const now = new Date();
+  const now = new Date(), todayStr = now.toISOString().split('T')[0];
   return entries.filter(e => {
+    if (currentFilter === 'today') return e.date === todayStr;
     const d = new Date(e.date + 'T12:00:00');
-    if (currentFilter === 'today') return e.date === now.toISOString().split('T')[0];
-    if (currentFilter === 'week') {
-      const start = new Date(now); start.setDate(now.getDate() - now.getDay());
-      start.setHours(0,0,0,0);
-      return d >= start;
-    }
+    if (currentFilter === 'week') { const s = new Date(now); s.setDate(now.getDate()-now.getDay()); s.setHours(0,0,0,0); return d >= s; }
     if (currentFilter === 'month') return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     if (currentFilter === 'year') return d.getFullYear() === now.getFullYear();
     return true;
   });
 }
 
-function workTagClass(w) {
-  if (w.includes('Structural')) return 'structural';
-  if (w.includes('Architectural')) return 'architectural';
-  if (w.includes('Construction')) return 'construction';
+function wtClass(w) {
+  if (!w) return '';
+  const wl = w.toLowerCase();
+  if (wl.includes('struct')) return 'structural';
+  if (wl.includes('arch')) return 'architectural';
+  if (wl.includes('construct')) return 'construction';
   return '';
+}
+
+function fmtDate(d) {
+  return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
 }
 
 function renderEntries() {
   const filtered = filterEntries();
-  const total = filtered.reduce((s, e) => s + e.hours, 0);
-  document.getElementById('totalHours').textContent = total.toFixed(2);
-
+  document.getElementById('totalHours').textContent = filtered.reduce((s,e) => s + e.hours, 0).toFixed(2);
   const list = document.getElementById('entriesList');
-  if (!filtered.length) {
-    list.innerHTML = `<div class="empty-state"><div class="icon">⏱</div>No entries for this period</div>`;
-    return;
-  }
-
+  if (!filtered.length) { list.innerHTML = '<div class="empty-state"><div style="font-size:36px;margin-bottom:12px">⏱</div>No entries for this period</div>'; return; }
   list.innerHTML = filtered.map(e => `
-    <div class="entry-card">
-      <button class="delete-btn" onclick="deleteEntry(${e.id})">✕</button>
+    <div class="entry-card" onclick="editEntry(${e.id})">
+      <button class="delete-btn" onclick="event.stopPropagation();deleteEntry(${e.id})">✕</button>
       <div class="entry-top">
-        <div class="entry-project">${e.project}</div>
+        <div class="entry-project">${e.project}${e.jobNumber ? ' <span style="font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace">#'+e.jobNumber+'</span>' : ''}</div>
         <div class="entry-hours">${e.hours}h</div>
       </div>
+      ${(e.subPhase||e.workType) ? `<div class="entry-sub">${e.subPhase||''}${e.subPhase && e.workType ? ' › ' : ''}${e.workType||''}</div>` : ''}
       <div class="entry-meta">
-        <span class="tag ${e.type.toLowerCase()}">${e.type}</span>
-        <span class="tag ${workTagClass(e.workType)}">${e.workType}</span>
+        ${e.type ? `<span class="tag ${e.type.toLowerCase()}">${e.type}</span>` : ''}
+        ${e.workType ? `<span class="tag ${wtClass(e.workType)}">${e.workType}</span>` : ''}
       </div>
       ${e.notes ? `<div class="entry-notes">${e.notes}</div>` : ''}
-      <div class="entry-date">${formatDate(e.date)}</div>
+      <div class="entry-date">${fmtDate(e.date)}</div>
     </div>
+    <div class="edit-hint">tap to edit</div>
   `).join('');
 }
 
-function formatDate(d) {
-  const dt = new Date(d + 'T12:00:00'); const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat']; const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return days[dt.getDay()] + ' ' + months[dt.getMonth()] + ' ' + dt.getDate() + ' ' + dt.getFullYear();
-}
-
 function deleteEntry(id) {
+  if (!confirm('Delete this entry?')) return;
   entries = entries.filter(e => e.id !== id);
   localStorage.setItem('timelog_entries', JSON.stringify(entries));
   renderEntries();
   deleteEntryFromSheet(id);
-  setSyncStatus('⟳ Syncing…', 'var(--accent)');
-  setTimeout(() => setSyncStatus('✓ Synced with Google Sheets', 'var(--accent2)'), 2000);
 }
 
-// ── EXPORT ─────────────────────────────────────────────────────────────────
-function exportExcel() {
+// ── EXPORT ────────────────────────────────────────────────────────────────
+function exportCSV() {
   const filtered = filterEntries();
   if (!filtered.length) { showToast('No entries to export.'); return; }
-
-  const filterLabel = { all:'All', today:'Today', week:'This Week', month:'This Month', year:'This Year' }[currentFilter];
   const sorted = [...filtered].sort((a,b) => a.date.localeCompare(b.date));
-  const fileName = 'TimeLog_' + filterLabel.replace(' ','_') + '_' + new Date().toISOString().split('T')[0];
-
-  try {
-    if (typeof XLSX === 'undefined') throw new Error('XLSX not loaded');
-
-    const rows = sorted.map(e => ({
-      'Date': formatDate(e.date),
-      'Project': e.project,
-      'Job / Proposal': e.type,
-      'Work Type': e.workType,
-      'Hours': e.hours,
-      'Notes': e.notes || ''
-    }));
-    rows.push({ 'Date': '', 'Project': 'TOTAL', 'Job / Proposal': '', 'Work Type': '', 'Hours': sorted.reduce((s,e) => s + e.hours, 0), 'Notes': '' });
-
-    const ws = XLSX.utils.json_to_sheet(rows);
-    ws['!cols'] = [{ wch:18 },{ wch:28 },{ wch:16 },{ wch:26 },{ wch:8 },{ wch:50 }];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Time Log');
-
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    downloadBlob(blob, fileName + '.xlsx');
-    showToast('Saved to Downloads: ' + fileName + '.xlsx');
-
-  } catch(err) {
-    exportCSV(sorted, fileName);
-  }
-}
-
-function exportCSV(sorted, fileName) {
-  const headers = ['Date','Project','Job / Proposal','Work Type','Hours','Notes'];
-  const q = s => '"' + String(s).replace(/"/g,'""') + '"';
-  const rows = sorted.map(e => [
-    q(formatDate(e.date)), q(e.project), q(e.type), q(e.workType), e.hours, q(e.notes||'')
-  ]);
-  rows.push([q(''),q('TOTAL'),q(''),q(''),sorted.reduce((s,e) => s + e.hours, 0),q('')]);
-  const csv = [headers.map(h => q(h)).join(','), ...rows.map(r => r.join(','))].join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  downloadBlob(blob, fileName + '.csv');
-  showToast('Saved as CSV: ' + fileName + '.csv — open in Excel');
-}
-
-function downloadBlob(blob, fileName) {
+  const q = s => '"' + String(s||'').replace(/"/g,'""') + '"';
+  const hdrs = ['Date','Employee','Job Number','Project','Sub-Phase','Work Type','Job/Proposal','Hours','Notes'];
+  const rows = sorted.map(e => [q(fmtDate(e.date)),q(e.employee||employeeName),q(e.jobNumber||''),q(e.project),q(e.subPhase||''),q(e.workType||''),q(e.type),e.hours,q(e.notes||'')]);
+  rows.push([q(''),q(''),q(''),q('TOTAL'),q(''),q(''),q(''),sorted.reduce((s,e)=>s+e.hours,0),q('')]);
+  const csv = [hdrs.map(h=>q(h)).join(','), ...rows.map(r=>r.join(','))].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName;
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(function() { URL.revokeObjectURL(url); document.body.removeChild(a); }, 2000);
+  const a = document.createElement('a'); a.href=url; a.download='TimeLog_'+new Date().toISOString().split('T')[0]+'.csv';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},2000);
+  showToast('✓ Exported to Downloads');
 }
 
-// ── TOAST ──────────────────────────────────────────────────────────────────
+// ── AJERA IMPORT ──────────────────────────────────────────────────────────
+function uploadPhases(input) {
+  const file = input.files[0]; if (!file) return;
+  document.getElementById('phasesFileName').textContent = '✓ ' + file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const wb = XLSX.read(e.target.result, {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, {header:1});
+    const parsed = [];
+    let curProject = null, curSubPhase = null;
+
+    rows.forEach(row => {
+      if (!row[0]) return;
+      const raw = String(row[0]);
+      const cell = raw.trim();
+      const budget = parseFloat(row[7]) || 0;
+
+      // Job number pattern — project level
+      const jobMatch = cell.match(/^([A-Z]{2,6}-\d{3,5})\s+(.+)/);
+      if (jobMatch) {
+        const nameParts = jobMatch[2].split(',');
+        const projectName = (nameParts.length > 1 ? nameParts[nameParts.length-1] : nameParts[0]).trim();
+        curProject = { name: projectName, jobNumber: jobMatch[1], phases: [] };
+        parsed.push(curProject);
+        curSubPhase = null;
+        return;
+      }
+      if (!curProject) return;
+
+      const isWorkType = /architectural|structure|structural|construction|engineering|design/i.test(cell);
+      const isPhaseHeader = /phase\s+(i|ii|iii|iv|v|\d+)/i.test(cell);
+
+      if (isPhaseHeader) return; // skip Phase I / Phase II headers
+
+      if (!isWorkType && budget !== phase_budget_of(curProject, cell)) {
+        // It's a sub-phase name
+        if (budget >= 0) curSubPhase = cell;
+      }
+
+      if (isWorkType && curSubPhase && budget > 0) {
+        let wt = cell;
+        if (/struct/i.test(cell)) wt = 'Structural Engineering';
+        else if (/arch/i.test(cell)) wt = 'Architectural Design';
+        else if (/construct/i.test(cell)) wt = 'Construction Management';
+        curProject.phases.push({ subPhase: curSubPhase, workType: wt, budget });
+      }
+    });
+
+    projects = parsed.filter(p => p.phases.length > 0);
+    localStorage.setItem('timelog_projects', JSON.stringify(projects));
+    renderProjectList();
+    showToast('✓ ' + projects.length + ' projects loaded');
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function phase_budget_of(proj, name) {
+  // helper placeholder — always returns -1 so non-work-type rows fall through to subphase detection
+  return -1;
+}
+
+function uploadTransactions(input) {
+  const file = input.files[0]; if (!file) return;
+  document.getElementById('transFileName').textContent = '✓ ' + file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const wb = XLSX.read(e.target.result, {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, {header:1});
+    const headers = rows[0] || [];
+    const pi = headers.indexOf('Phase ID & Description');
+    const ei = headers.indexOf('Employee');
+    const hi = headers.indexOf('Units/Hours');
+    const si = headers.indexOf('Spent Amount');
+
+    transactions = rows.slice(1).filter(r => r[pi]).map(row => {
+      const phaseStr = String(row[pi]);
+      const parts = phaseStr.split('\n').map(s=>s.trim()).filter(Boolean);
+      const subPhase = parts[1] || '';
+      const rawWT = parts[2] || '';
+      const wt = /struct/i.test(rawWT) ? 'Structural Engineering'
+               : /arch/i.test(rawWT) ? 'Architectural Design'
+               : /construct/i.test(rawWT) ? 'Construction Management' : rawWT;
+      return { employee: row[ei]||'', subPhase, workType: wt, hours: parseFloat(row[hi])||0, spent: parseFloat(row[si])||0 };
+    });
+
+    localStorage.setItem('timelog_transactions', JSON.stringify(transactions));
+    showToast('✓ ' + transactions.length + ' transactions loaded');
+    updateBudgetPanel();
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderProjectList() {
+  const el = document.getElementById('projectListDisplay');
+  if (!projects.length) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="section-title" style="margin-top:24px;margin-bottom:12px">Loaded Projects (${projects.length})</div>` +
+    projects.map(p => `
+      <div class="project-item">
+        <div class="pname">${p.name}</div>
+        <div class="pjob">${p.jobNumber}</div>
+        ${p.phases.map(ph => `<div class="pphase">${ph.subPhase} › ${ph.workType} — $${ph.budget.toLocaleString()}</div>`).join('')}
+      </div>`).join('');
+}
+
+// ── GOOGLE SHEETS SYNC ────────────────────────────────────────────────────
+function setSyncStatus(msg, color) {
+  const el = document.getElementById('syncStatus');
+  if (el) { el.textContent = msg; el.style.color = color||'var(--muted)'; }
+}
+
+function syncFromSheet() {
+  setSyncStatus('⟳ Syncing…', 'var(--accent)');
+  fetch(SCRIPT_URL)
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'ok' && data.entries) {
+        entries = data.entries.map(e => ({
+          id: Number(e.id), date: e.date, project: e.project,
+          subPhase: e.subPhase||'', workType: e.workType||'',
+          jobNumber: e.jobNumber||'', type: e.type,
+          hours: Number(e.hours), notes: e.notes||'', employee: e.employee||''
+        }));
+        entries.sort((a,b) => b.id - a.id);
+        localStorage.setItem('timelog_entries', JSON.stringify(entries));
+        renderEntries();
+        setSyncStatus('✓ Synced', 'var(--accent2)');
+      }
+    })
+    .catch(() => setSyncStatus('⚠ Offline', 'var(--red)'));
+}
+
+function pushEntryToSheet(entry) {
+  fetch(SCRIPT_URL, {method:'POST', body:JSON.stringify({action:'save',...entry})}).catch(()=>{});
+  setSyncStatus('⟳ Saving…','var(--accent)');
+  setTimeout(()=>setSyncStatus('✓ Synced','var(--accent2)'),2000);
+}
+
+function updateEntryInSheet(entry) {
+  fetch(SCRIPT_URL, {method:'POST', body:JSON.stringify({action:'update',...entry})}).catch(()=>{});
+}
+
+function deleteEntryFromSheet(id) {
+  fetch(SCRIPT_URL, {method:'POST', body:JSON.stringify({action:'delete',id})}).catch(()=>{});
+}
+
 function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
-}
-
-function openVoicePaste() {
-  const box = document.getElementById('voicePasteBox');
-  box.style.display = box.style.display === 'none' ? 'block' : 'none';
-  if (box.style.display === 'block') {
-    document.getElementById('voicePasteInput').focus();
-  }
-}
-
-function parsePastedVoice() {
-  const text = document.getElementById('voicePasteInput').value.trim();
-  if (!text) { showToast('Please speak or type something first.'); return; }
-  showTranscript('Parsing: ' + text);
-  document.getElementById('voicePasteBox').style.display = 'none';
-  document.getElementById('voicePasteInput').value = '';
-  parseVoice(text);
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
 }
 
 init();
 </script>
-</body>
-</html>
+
+
+</body></html>
