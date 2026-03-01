@@ -554,19 +554,15 @@ function syncFromSheet() {
     .then(data => {
       if (data.status === 'ok' && data.entries) {
         // Merge: sheet is source of truth, keep any local entries not yet synced
-        const sheetIds = new Set(data.entries.map(e => String(e.id)));
-        const localOnly = entries.filter(e => !sheetIds.has(String(e.id)));
         entries = data.entries.map(e => ({
           id: Number(e.id), date: e.date, project: e.project,
           type: e.type, workType: e.workType,
           hours: Number(e.hours), notes: e.notes || ''
-        })).concat(localOnly);
+        }));
         entries.sort((a,b) => b.id - a.id);
         localStorage.setItem('timelog_entries', JSON.stringify(entries));
         renderEntries();
         setSyncStatus('✓ Synced with Google Sheets', 'var(--accent2)');
-        // Push any local-only entries up to sheet
-        localOnly.forEach(e => pushEntryToSheet(e));
       }
     })
     .catch(() => setSyncStatus('⚠ Offline — data saved locally', 'var(--red)'));
