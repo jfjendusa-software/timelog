@@ -444,19 +444,19 @@ function updateBudgetPanel() {
   const phase = project.phases.find(p => p.subPhase === subPhase && p.workType === workType);
   if (!phase) return;
 
-  // Billable rate = average (spent/hours) from transactions for this employee
-  const myTrans = transactions.filter(t => t.employee === employeeName && t.hours > 0 && t.spent > 0);
-  const billableRate = myTrans.length > 0
-    ? myTrans.reduce((s,t) => s + t.spent / t.hours, 0) / myTrans.length : 0;
+  // Billable rate = average (spent/hours) from ALL transactions for this phase+worktype
+  const phaseTrans = transactions.filter(t => t.subPhase === subPhase && t.workType === workType && t.hours > 0 && t.spent > 0);
+  const billableRate = phaseTrans.length > 0
+    ? phaseTrans.reduce((s,t) => s + t.spent, 0) / phaseTrans.reduce((s,t) => s + t.hours, 0) : 0;
 
-  // Hours already in Ajera for this employee + phase + worktype
+  // ALL hours already in Ajera for this phase + worktype (all employees)
   const ajeraHrs = transactions
-    .filter(t => t.employee === employeeName && t.subPhase === subPhase && t.workType === workType)
+    .filter(t => t.subPhase === subPhase && t.workType === workType)
     .reduce((s,t) => s + t.hours, 0);
 
-  // Hours from this app for this employee + project + subphase + worktype
+  // Hours from this app for this project + subphase + worktype (all employees)
   const appHrs = entries
-    .filter(e => (e.employee || '') === employeeName && e.project === name && e.subPhase === subPhase && e.workType === workType)
+    .filter(e => e.project === name && e.subPhase === subPhase && e.workType === workType)
     .reduce((s,e) => s + e.hours, 0);
 
   const totalLogged  = ajeraHrs + appHrs;
