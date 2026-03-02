@@ -980,7 +980,10 @@ function parsePhasesRows(rows) {
       if (/struct/i.test(wt))         wt = 'Structural Engineering';
       else if (/arch/i.test(wt))      wt = 'Architectural Design';
       else if (/construct/i.test(wt)) wt = 'Construction Management';
-      phases.push({ subPhase: curSubPhase, workType: wt, budget });
+      // If same subPhase+workType already exists, sum the budgets (handles split budget lines)
+      const existing = phases.find(p => p.subPhase === curSubPhase && p.workType === wt);
+      if (existing) { existing.budget += budget; }
+      else { phases.push({ subPhase: curSubPhase, workType: wt, budget }); }
     }
   }
   if (!jobNumber || !phases.length) return null;
