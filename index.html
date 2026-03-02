@@ -1006,17 +1006,28 @@ function parseTransactionsRows(rows) {
   const hoursIdx = headers.indexOf('Units/Hours');
   const spentIdx = headers.indexOf('Spent Amount');
   if (phaseIdx < 0 || empIdx < 0) return [];
-  // Find jobNumber by matching subPhases in this file against loaded projects
+  // Find jobNumber by scoring projects against subPhases+workTypes in this file
   let fileJobNumber = '';
-  const subPhasesInFile = new Set();
+  const combosInFile = new Set();
   for (let i = headerRow + 1; i < rows.length; i++) {
     const parts = String(rows[i][phaseIdx] || '').split('\n').map(s => s.trim()).filter(Boolean);
-    if (parts.length >= 2) subPhasesInFile.add(parts[parts.length - 2]);
+    if (parts.length >= 2) {
+      const sp = parts[parts.length - 2];
+      const rawWT = parts[parts.length - 1];
+      let wt = rawWT;
+      if (/struct/i.test(rawWT)) wt = 'Structural Engineering';
+      else if (/arch/i.test(rawWT)) wt = 'Architectural Design';
+      else if (/construct/i.test(rawWT)) wt = 'Construction Management';
+      combosInFile.add(sp + '|' + wt);
+    }
   }
+  let bestScore = 0;
   for (const proj of projects) {
-    const projSubPhases = new Set((proj.phases || []).map(p => p.subPhase));
-    const matches = [...subPhasesInFile].filter(sp => projSubPhases.has(sp));
-    if (matches.length > 0) { fileJobNumber = proj.jobNumber; break; }
+    const projCombos = new Set((proj.phases || []).map(p => p.subPhase + '|' + p.workType));
+    const matches = [...combosInFile].filter(c => projCombos.has(c)).length;
+    const penalty = Math.abs(projCombos.size - combosInFile.size);
+    const score = matches * 10 - penalty;
+    if (matches > 0 && score > bestScore) { bestScore = score; fileJobNumber = proj.jobNumber; }
   }
   const results = [];
   for (let i = headerRow + 1; i < rows.length; i++) {
