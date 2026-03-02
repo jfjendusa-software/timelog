@@ -1005,9 +1005,10 @@ function parseTransactionsRows(rows) {
     const row = rows[i];
     if (!row[phaseIdx]) continue;
     const parts    = String(row[phaseIdx]).split('\n').map(s => s.trim()).filter(Boolean);
-    // Format: "SubPhase\n     WorkType" → parts[0]=subPhase, parts[1]=workType
-    const subPhase = parts[0] || '';
-    const rawWT    = parts[1] || '';
+    // Ajera format varies: 2-level "SubPhase\nWorkType" or 3-level "Phase\nSubPhase\nWorkType"
+    // Always use last part as workType, second-to-last as subPhase
+    const subPhase = parts.length >= 2 ? parts[parts.length - 2] : (parts[0] || '');
+    const rawWT    = parts[parts.length - 1] || '';
     let wt = rawWT;
     if (/struct/i.test(rawWT))         wt = 'Structural Engineering';
     else if (/arch/i.test(rawWT))      wt = 'Architectural Design';
