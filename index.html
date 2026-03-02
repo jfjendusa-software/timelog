@@ -380,14 +380,18 @@ function projectAutocomplete(val) {
   if (!val || val.length < 2) { document.getElementById('projectDropdown').classList.remove('open'); return; }
   const matches = projects.filter(p => p.name.toLowerCase().includes(val.toLowerCase()));
   if (!matches.length) { document.getElementById('projectDropdown').classList.remove('open'); return; }
-  document.getElementById('projectDropdown').innerHTML = matches.map(p =>
-    `<div class="autocomplete-item"
-      onmousedown="event.preventDefault();selectProject(${JSON.stringify(p.name)})"
-      ontouchstart="event.preventDefault();selectProject(${JSON.stringify(p.name)})">
+  const dd = document.getElementById('projectDropdown');
+  dd.innerHTML = matches.map(p =>
+    `<div class="autocomplete-item" data-name="${p.name.replace(/"/g,'&quot;')}">
       <strong>${p.name}</strong>
       <span style="float:right;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace">${p.jobNumber}</span>
     </div>`
   ).join('');
+  dd.querySelectorAll('.autocomplete-item').forEach(el => {
+    const handler = (e) => { e.preventDefault(); selectProject(el.dataset.name); };
+    el.addEventListener('mousedown', handler);
+    el.addEventListener('touchstart', handler);
+  });
   document.getElementById('projectDropdown').classList.add('open');
 }
 
