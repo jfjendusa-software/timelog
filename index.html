@@ -928,7 +928,7 @@ function handleFileInput(files, type) {
           const project = parsePhasesRows(rows);
           if (project) {
             // Store seq number -> jobNumber mapping for transaction matching
-            const seqMatch = file.name.match(/__(\d+)_/);
+            const seqMatch = file.name.match(/__(\d+)_/) || file.name.match(/\((\d+)\)/);
             if (seqMatch) {
               window._seqToJob = window._seqToJob || {};
               window._seqToJob[seqMatch[1]] = project.jobNumber;
@@ -1019,7 +1019,7 @@ function parseTransactionsRows(rows, filename) {
   let fileJobNumber = '';
   if (filename) {
     // Method 1: sequence number match with paired phases file (e.g. __8_ -> BMD-1012)
-    const seqMatch = String(filename).match(/__(\d+)_/);
+    const seqMatch = String(filename).match(/__(\d+)_/) || String(filename).match(/\((\d+)\)/);
     if (seqMatch && window._seqToJob && window._seqToJob[seqMatch[1]]) {
       fileJobNumber = window._seqToJob[seqMatch[1]];
     }
