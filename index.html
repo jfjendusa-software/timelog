@@ -1006,16 +1006,17 @@ function parseTransactionsRows(rows) {
   const hoursIdx = headers.indexOf('Units/Hours');
   const spentIdx = headers.indexOf('Spent Amount');
   if (phaseIdx < 0 || empIdx < 0) return [];
-  // Extract jobNumber from the phase ID column if present (e.g. "BMD-1012 Physical Therapy...")
+  // Find jobNumber by matching subPhases in this file against loaded projects
   let fileJobNumber = '';
+  const subPhasesInFile = new Set();
   for (let i = headerRow + 1; i < rows.length; i++) {
-    const cell = String(rows[i][phaseIdx] || '');
-    const jm = cell.match(/([A-Z]{2,6}-\d{3,6})/);
-    if (jm) { fileJobNumber = jm[1]; break; }
-    // Also check first column of each row
-    const firstCell = String(rows[i][0] || '');
-    const jm2 = firstCell.match(/([A-Z]{2,6}-\d{3,6})/);
-    if (jm2) { fileJobNumber = jm2[1]; break; }
+    const parts = String(rows[i][phaseIdx] || '').split('\n').map(s => s.trim()).filter(Boolean);
+    if (parts.length >= 2) subPhasesInFile.add(parts[parts.length - 2]);
+  }
+  for (const proj of projects) {
+    const projSubPhases = new Set((proj.phases || []).map(p => p.subPhase));
+    const matches = [...subPhasesInFile].filter(sp => projSubPhases.has(sp));
+    if (matches.length > 0) { fileJobNumber = proj.jobNumber; break; }
   }
   const results = [];
   for (let i = headerRow + 1; i < rows.length; i++) {
