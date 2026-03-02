@@ -452,15 +452,15 @@ function updateBudgetPanel() {
   const phase = project.phases.find(p => p.subPhase === subPhase && p.workType === workType);
   if (!phase) return;
 
-  // Billable rate = average (spent/hours) from ALL transactions for this phase+worktype
-  const phaseTrans = transactions.filter(t => t.subPhase === subPhase && t.workType === workType && t.hours > 0 && t.spent > 0);
-  const billableRate = phaseTrans.length > 0
-    ? phaseTrans.reduce((s,t) => s + t.spent, 0) / phaseTrans.reduce((s,t) => s + t.hours, 0) : 0;
+  // All transactions for this phase + worktype
+  const phaseTrans = transactions.filter(t => t.subPhase === subPhase && t.workType === workType);
+  
+  // Total hours and dollars already in Ajera
+  const ajeraHrs   = phaseTrans.reduce((s,t) => s + (t.hours || 0), 0);
+  const totalSpentAjera = phaseTrans.reduce((s,t) => s + (t.spent || 0), 0);
 
-  // ALL hours already in Ajera for this phase + worktype (all employees)
-  const ajeraHrs = transactions
-    .filter(t => t.subPhase === subPhase && t.workType === workType)
-    .reduce((s,t) => s + t.hours, 0);
+  // Billable rate from actual spend data
+  const billableRate = ajeraHrs > 0 && totalSpentAjera > 0 ? totalSpentAjera / ajeraHrs : 185;
 
   // Hours from this app for this project + subphase + worktype (all employees)
   const appHrs = entries
@@ -477,10 +477,9 @@ function updateBudgetPanel() {
   if (pct >= 90) { color = 'var(--red)'; cls = 'red'; }
   else if (pct >= 70) { color = 'var(--yellow)'; cls = 'yellow'; }
 
-  // Total dollars spent on this phase/worktype
-  const totalSpent = transactions
-    .filter(t => t.subPhase === subPhase && t.workType === workType)
-    .reduce((s,t) => s + t.spent, 0);
+  // Total dollars spent (from Ajera) + estimated from app entries
+  const appSpent    = appHrs * billableRate;
+  const totalSpent  = totalSpentAjera + appSpent;
   const dollarRemaining = dollarBudget - totalSpent;
 
   document.getElementById('bpWorkType').textContent   = workType;
