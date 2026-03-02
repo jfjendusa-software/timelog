@@ -311,10 +311,10 @@ select option { background: #1a1a1a; }
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;">
     <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:10px;font-weight:500;">Weekly Steps</div>
     <div style="font-size:13px;color:var(--text);line-height:2.2;">
-      <span style="color:var(--accent);font-family:'Courier New',monospace;margin-right:8px;">1</span> Export all Phases reports from Ajera<br>
-      <span style="color:var(--accent);font-family:'Courier New',monospace;margin-right:8px;">2</span> Drop all Phases files into the box below<br>
-      <span style="color:var(--accent);font-family:'Courier New',monospace;margin-right:8px;">3</span> Repeat for Transactions files<br>
-      <span style="color:var(--accent);font-family:'Courier New',monospace;margin-right:8px;">4</span> Done — projects load instantly
+      <span style="color:var(--accent);font-family:'Courier New',monospace;margin-right:8px;">1</span> Export <strong>Time Record Lists</strong> report from Ajera<br>
+      <span style="color:var(--accent);font-family:'Courier New',monospace;margin-right:8px;">2</span> Drop the single file into box ② below<br>
+      <span style="color:var(--accent);font-family:'Courier New',monospace;margin-right:8px;">3</span> Done — all projects update instantly<br>
+      <span style="color:var(--muted);font-family:'Courier New',monospace;margin-right:8px;">4</span> <span style="color:var(--muted)">Re-upload Phases files only when budgets change</span>
     </div>
   </div>
 
@@ -339,8 +339,8 @@ select option { background: #1a1a1a; }
     ondrop="handleDrop(event,'trans')">
     <input type="file" id="transFiles" accept=".xlsx" multiple onclick="event.stopPropagation()" onchange="handleFileInput(this.files,'trans')">
     <div class="upload-icon">⏱</div>
-    <p>Click or drag all <strong>Transactions</strong> .xlsx files here<br>
-    <span style="font-size:11px;">Select all at once with Ctrl+A in file picker</span></p>
+    <p>Drop single <strong>Time Record Lists</strong> file <em>or</em> multiple old Transactions files<br>
+    <span style="font-size:11px;">Time Record Lists covers all projects in one file</span></p>
     <div id="transStatus" style="margin-top:8px;font-size:12px;font-family:'Courier New',monospace;color:var(--accent2);"></div>
   </div>
 
@@ -1029,25 +1029,57 @@ function parseTransactionsRows(rows, filename) {
   const headers  = rows[headerRow].map(h => String(h));
   const phaseIdx = headers.findIndex(h => h.includes('Phase ID'));
   const empIdx   = headers.indexOf('Employee');
+  if (phaseIdx < 0 || empIdx < 0) return [];
+
+  // Detect format: Time Record Lists has job number in col 0 and "Billing Rate"+"WIP Amount"
+  // Old Transactions format has "Units/Hours" and "Spent Amount"
+  const isTimeRecords = headers.some(h => h.includes('Billing Rate')) && headers[0].includes('Project ID');
+  
+  if (isTimeRecords) {
+    // NEW FORMAT: Time Record Lists — single file, all projects, job number in col 0
+    const hoursIdx = headers.indexOf('Hours');
+    const rateIdx  = headers.indexOf('Billing Rate');
+    const results  = [];
+    for (let i = headerRow + 1; i < rows.length; i++) {
+      const row = rows[i];
+      if (!row[0] || !row[phaseIdx]) continue;
+      // Extract job number from col 0: "BMD-1001 Project Name..."
+      const projCell = String(row[0] || '');
+      const jm = projCell.match(/^([A-Z]{2,6}-\d{3,6})/);
+      if (!jm) continue;
+      const jobNumber = jm[1];
+      const parts   = String(row[phaseIdx]).split('\n').map(s => s.trim()).filter(Boolean);
+      const subPhase = parts.length >= 2 ? parts[parts.length - 2] : (parts[0] || '');
+      const rawWT    = parts[parts.length - 1] || '';
+      let wt = rawWT;
+      if (/struct/i.test(rawWT))         wt = 'Structural Engineering';
+      else if (/arch/i.test(rawWT))      wt = 'Architectural Design';
+      else if (/construct/i.test(rawWT)) wt = 'Construction Management';
+      const hours = parseFloat(row[hoursIdx]) || 0;
+      const rate  = parseFloat(row[rateIdx])  || 0;
+      const spent = hours * rate;
+      const emp   = String(row[empIdx] || '').trim();
+      if (hours <= 0) continue;
+      results.push({ employee: emp, jobNumber, subPhase, workType: wt, hours, spent });
+    }
+    return results;
+  }
+
+  // OLD FORMAT: individual Transactions files
   const hoursIdx = headers.indexOf('Units/Hours');
   const spentIdx = headers.indexOf('Spent Amount');
-  if (phaseIdx < 0 || empIdx < 0) return [];
-  // Try to get jobNumber from filename first
+  // Try to get jobNumber from filename
   let fileJobNumber = '';
   if (filename) {
-    // Method 1: sequence number match with paired phases file (e.g. __8_ -> BMD-1012)
     const seqMatch = String(filename).match(/__(\d+)_/) || String(filename).match(/\((\d+)\)/);
     if (seqMatch && window._seqToJob && window._seqToJob[seqMatch[1]]) {
       fileJobNumber = window._seqToJob[seqMatch[1]];
     }
-    // Method 2: job number directly in filename (e.g. "BMD-1012_Transactions.xlsx")
     if (!fileJobNumber) {
       const fnMatch = String(filename).match(/([A-Z]{2,6}-\d{3,6})/i);
       if (fnMatch) fileJobNumber = fnMatch[1].toUpperCase();
     }
   }
-  
-  // If not in filename, score projects by matching subPhase+workType combos
   if (!fileJobNumber) {
     const combosInFile = new Set();
     for (let i = headerRow + 1; i < rows.length; i++) {
@@ -1076,8 +1108,6 @@ function parseTransactionsRows(rows, filename) {
     const row = rows[i];
     if (!row[phaseIdx]) continue;
     const parts    = String(row[phaseIdx]).split('\n').map(s => s.trim()).filter(Boolean);
-    // Ajera format varies: 2-level "SubPhase\nWorkType" or 3-level "Phase\nSubPhase\nWorkType"
-    // Always use last part as workType, second-to-last as subPhase
     const subPhase = parts.length >= 2 ? parts[parts.length - 2] : (parts[0] || '');
     const rawWT    = parts[parts.length - 1] || '';
     let wt = rawWT;
@@ -1087,7 +1117,6 @@ function parseTransactionsRows(rows, filename) {
     const hours = parseFloat(row[hoursIdx]) || 0;
     const spent = parseFloat(row[spentIdx]) || 0;
     const emp   = String(row[empIdx]||'').trim();
-    // Include Beg. Balance rows as spent-only (hours=0) so dollar totals are correct
     if (hours <= 0 && spent <= 0) continue;
     results.push({ employee: emp, jobNumber: fileJobNumber, subPhase, workType: wt, hours, spent });
   }
