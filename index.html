@@ -1014,8 +1014,10 @@ function parseTransactionsRows(rows) {
     else if (/construct/i.test(rawWT)) wt = 'Construction Management';
     const hours = parseFloat(row[hoursIdx]) || 0;
     const spent = parseFloat(row[spentIdx]) || 0;
-    if (hours <= 0) continue;
-    results.push({ employee: String(row[empIdx]||'').trim(), subPhase, workType: wt, hours, spent });
+    const emp   = String(row[empIdx]||'').trim();
+    // Include Beg. Balance rows as spent-only (hours=0) so dollar totals are correct
+    if (hours <= 0 && spent <= 0) continue;
+    results.push({ employee: emp, subPhase, workType: wt, hours, spent });
   }
   return results;
 }
