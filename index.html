@@ -452,8 +452,11 @@ function updateBudgetPanel() {
   const phase = project.phases.find(p => p.subPhase === subPhase && p.workType === workType);
   if (!phase) return;
 
-  // All transactions for this phase + worktype
-  const phaseTrans = transactions.filter(t => t.subPhase === subPhase && t.workType === workType);
+  // All transactions for this phase + worktype, filtered by jobNumber when available
+  const phaseTrans = transactions.filter(t => 
+    t.subPhase === subPhase && t.workType === workType &&
+    (!t.jobNumber || !project.jobNumber || t.jobNumber === project.jobNumber)
+  );
   
   // Total hours and dollars already in Ajera
   const ajeraHrs   = phaseTrans.reduce((s,t) => s + (t.hours || 0), 0);
@@ -1003,6 +1006,17 @@ function parseTransactionsRows(rows) {
   const hoursIdx = headers.indexOf('Units/Hours');
   const spentIdx = headers.indexOf('Spent Amount');
   if (phaseIdx < 0 || empIdx < 0) return [];
+  // Extract jobNumber from the phase ID column if present (e.g. "BMD-1012 Physical Therapy...")
+  let fileJobNumber = '';
+  for (let i = headerRow + 1; i < rows.length; i++) {
+    const cell = String(rows[i][phaseIdx] || '');
+    const jm = cell.match(/([A-Z]{2,6}-\d{3,6})/);
+    if (jm) { fileJobNumber = jm[1]; break; }
+    // Also check first column of each row
+    const firstCell = String(rows[i][0] || '');
+    const jm2 = firstCell.match(/([A-Z]{2,6}-\d{3,6})/);
+    if (jm2) { fileJobNumber = jm2[1]; break; }
+  }
   const results = [];
   for (let i = headerRow + 1; i < rows.length; i++) {
     const row = rows[i];
@@ -1021,7 +1035,7 @@ function parseTransactionsRows(rows) {
     const emp   = String(row[empIdx]||'').trim();
     // Include Beg. Balance rows as spent-only (hours=0) so dollar totals are correct
     if (hours <= 0 && spent <= 0) continue;
-    results.push({ employee: emp, subPhase, workType: wt, hours, spent });
+    results.push({ employee: emp, jobNumber: fileJobNumber, subPhase, workType: wt, hours, spent });
   }
   return results;
 }
