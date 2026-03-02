@@ -926,9 +926,17 @@ function handleFileInput(files, type) {
         const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
         if (type === 'phases') {
           const project = parsePhasesRows(rows);
-          if (project) results.push(project);
+          if (project) {
+            // Store seq number -> jobNumber mapping for transaction matching
+            const seqMatch = file.name.match(/__(\d+)_/);
+            if (seqMatch) {
+              window._seqToJob = window._seqToJob || {};
+              window._seqToJob[seqMatch[1]] = project.jobNumber;
+            }
+            results.push(project);
+          }
         } else {
-          const trans = parseTransactionsRows(rows);
+          const trans = parseTransactionsRows(rows, file.name);
           results.push(...trans);
         }
       } catch(err) {
@@ -993,7 +1001,7 @@ function parsePhasesRows(rows) {
   return { jobNumber, name: projectName, phases };
 }
 
-function parseTransactionsRows(rows) {
+function parseTransactionsRows(rows, filename) {
   if (!rows || !rows.length) return [];
   let headerRow = -1;
   for (let i = 0; i < Math.min(rows.length, 5); i++) {
@@ -1006,28 +1014,44 @@ function parseTransactionsRows(rows) {
   const hoursIdx = headers.indexOf('Units/Hours');
   const spentIdx = headers.indexOf('Spent Amount');
   if (phaseIdx < 0 || empIdx < 0) return [];
-  // Find jobNumber by scoring projects against subPhases+workTypes in this file
+  // Try to get jobNumber from filename first
   let fileJobNumber = '';
-  const combosInFile = new Set();
-  for (let i = headerRow + 1; i < rows.length; i++) {
-    const parts = String(rows[i][phaseIdx] || '').split('\n').map(s => s.trim()).filter(Boolean);
-    if (parts.length >= 2) {
-      const sp = parts[parts.length - 2];
-      const rawWT = parts[parts.length - 1];
-      let wt = rawWT;
-      if (/struct/i.test(rawWT)) wt = 'Structural Engineering';
-      else if (/arch/i.test(rawWT)) wt = 'Architectural Design';
-      else if (/construct/i.test(rawWT)) wt = 'Construction Management';
-      combosInFile.add(sp + '|' + wt);
+  if (filename) {
+    // Method 1: sequence number match with paired phases file (e.g. __8_ -> BMD-1012)
+    const seqMatch = String(filename).match(/__(\d+)_/);
+    if (seqMatch && window._seqToJob && window._seqToJob[seqMatch[1]]) {
+      fileJobNumber = window._seqToJob[seqMatch[1]];
+    }
+    // Method 2: job number directly in filename (e.g. "BMD-1012_Transactions.xlsx")
+    if (!fileJobNumber) {
+      const fnMatch = String(filename).match(/([A-Z]{2,6}-\d{3,6})/i);
+      if (fnMatch) fileJobNumber = fnMatch[1].toUpperCase();
     }
   }
-  let bestScore = 0;
-  for (const proj of projects) {
-    const projCombos = new Set((proj.phases || []).map(p => p.subPhase + '|' + p.workType));
-    const matches = [...combosInFile].filter(c => projCombos.has(c)).length;
-    const penalty = Math.abs(projCombos.size - combosInFile.size);
-    const score = matches * 10 - penalty;
-    if (matches > 0 && score > bestScore) { bestScore = score; fileJobNumber = proj.jobNumber; }
+  
+  // If not in filename, score projects by matching subPhase+workType combos
+  if (!fileJobNumber) {
+    const combosInFile = new Set();
+    for (let i = headerRow + 1; i < rows.length; i++) {
+      const parts = String(rows[i][phaseIdx] || '').split('\n').map(s => s.trim()).filter(Boolean);
+      if (parts.length >= 2) {
+        const sp = parts[parts.length - 2];
+        const rawWT = parts[parts.length - 1];
+        let wt = rawWT;
+        if (/struct/i.test(rawWT)) wt = 'Structural Engineering';
+        else if (/arch/i.test(rawWT)) wt = 'Architectural Design';
+        else if (/construct/i.test(rawWT)) wt = 'Construction Management';
+        combosInFile.add(sp + '|' + wt);
+      }
+    }
+    let bestScore = 0;
+    for (const proj of projects) {
+      const projCombos = new Set((proj.phases || []).map(p => p.subPhase + '|' + p.workType));
+      const matches = [...combosInFile].filter(c => projCombos.has(c)).length;
+      const penalty = Math.abs(projCombos.size - combosInFile.size);
+      const score = matches * 10 - penalty;
+      if (matches > 0 && score > bestScore) { bestScore = score; fileJobNumber = proj.jobNumber; }
+    }
   }
   const results = [];
   for (let i = headerRow + 1; i < rows.length; i++) {
