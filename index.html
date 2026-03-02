@@ -224,11 +224,19 @@ select option { background: #1a1a1a; }
       </div>
       <div class="budget-num">
         <div class="val" id="bpRemaining">—</div>
-        <div class="lbl">Remaining</div>
+        <div class="lbl">Hrs Left</div>
       </div>
       <div class="budget-num">
         <div class="val" id="bpDollar">—</div>
         <div class="lbl">$ Budget</div>
+      </div>
+      <div class="budget-num">
+        <div class="val" id="bpSpent">—</div>
+        <div class="lbl">$ Spent</div>
+      </div>
+      <div class="budget-num">
+        <div class="val" id="bpDollarRemaining">—</div>
+        <div class="lbl">$ Left</div>
       </div>
     </div>
     <div class="slider-track">
@@ -468,6 +476,12 @@ function updateBudgetPanel() {
   let color = 'var(--accent2)', cls = 'green';
   if (pct >= 90) { color = 'var(--red)'; cls = 'red'; }
   else if (pct >= 70) { color = 'var(--yellow)'; cls = 'yellow'; }
+
+  // Total dollars spent on this phase/worktype
+  const totalSpent = transactions
+    .filter(t => t.subPhase === subPhase && t.workType === workType)
+    .reduce((s,t) => s + t.spent, 0);
+  const dollarRemaining = dollarBudget - totalSpent;
 
   document.getElementById('bpWorkType').textContent   = workType;
   document.getElementById('bpLogged').textContent     = totalLogged.toFixed(1) + 'h';
@@ -987,8 +1001,9 @@ function parseTransactionsRows(rows) {
     const row = rows[i];
     if (!row[phaseIdx]) continue;
     const parts    = String(row[phaseIdx]).split('\n').map(s => s.trim()).filter(Boolean);
-    const subPhase = parts[1] || '';
-    const rawWT    = parts[2] || '';
+    // Format: "SubPhase\n     WorkType" → parts[0]=subPhase, parts[1]=workType
+    const subPhase = parts[0] || '';
+    const rawWT    = parts[1] || '';
     let wt = rawWT;
     if (/struct/i.test(rawWT))         wt = 'Structural Engineering';
     else if (/arch/i.test(rawWT))      wt = 'Architectural Design';
