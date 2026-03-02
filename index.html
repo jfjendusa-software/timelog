@@ -261,6 +261,17 @@ select option { background: #1a1a1a; }
     </div>
   </div>
 
+  <div class="field-row">
+    <div class="form-group">
+      <label>Mileage</label>
+      <input type="number" id="mileage" placeholder="0" step="1" min="0">
+    </div>
+    <div class="form-group">
+      <label>Reimbursable ($)</label>
+      <input type="number" id="reimbursable" placeholder="0.00" step="0.01" min="0">
+    </div>
+  </div>
+
   <div class="form-group">
     <label>Notes</label>
     <textarea id="notes" placeholder="What did you work on?"></textarea>
@@ -388,6 +399,7 @@ function projectAutocomplete(val) {
   if (!val || val.length < 2) { document.getElementById('projectDropdown').classList.remove('open'); return; }
   const matches = projects.filter(p => p.name.toLowerCase().includes(val.toLowerCase()));
   if (!matches.length) { document.getElementById('projectDropdown').classList.remove('open'); return; }
+  // Show all matches (no limit)
   const dd = document.getElementById('projectDropdown');
   dd.innerHTML = matches.map(p =>
     `<div class="autocomplete-item" data-name="${p.name.replace(/"/g,'&quot;')}">
@@ -621,12 +633,14 @@ function setType(t) {
 }
 
 function saveEntry() {
-  const project  = document.getElementById('projectName').value.trim();
-  const subPhase = document.getElementById('subPhase').value;
-  const workType = document.getElementById('workType').value;
-  const hours    = parseFloat(document.getElementById('hours').value);
-  const date     = document.getElementById('entryDate').value;
-  const notes    = document.getElementById('notes').value.trim();
+  const project     = document.getElementById('projectName').value.trim();
+  const subPhase    = document.getElementById('subPhase').value;
+  const workType    = document.getElementById('workType').value;
+  const hours       = parseFloat(document.getElementById('hours').value);
+  const date        = document.getElementById('entryDate').value;
+  const notes       = document.getElementById('notes').value.trim();
+  const mileage     = parseFloat(document.getElementById('mileage').value) || 0;
+  const reimbursable = parseFloat(document.getElementById('reimbursable').value) || 0;
 
   if (!project)       { showToast('Please enter a project.'); return; }
   if (!hours || hours <= 0) { showToast('Please enter valid hours.'); return; }
@@ -638,7 +652,7 @@ function saveEntry() {
   if (editingId !== null) {
     const idx = entries.findIndex(e => e.id === editingId);
     if (idx !== -1) {
-      entries[idx] = { ...entries[idx], date, project, subPhase, workType, jobNumber, hours, type: currentType, notes };
+      entries[idx] = { ...entries[idx], date, project, subPhase, workType, jobNumber, hours, type: currentType, notes, mileage, reimbursable };
       updateEntryInSheet(entries[idx]);
     }
     editingId = null;
@@ -646,7 +660,7 @@ function saveEntry() {
     document.getElementById('cancelEditBtn').style.display = 'none';
     showToast('✓ Entry updated!');
   } else {
-    const entry = { id: Date.now(), date, project, subPhase, workType, jobNumber, hours, type: currentType, notes, employee: employeeName };
+    const entry = { id: Date.now(), date, project, subPhase, workType, jobNumber, hours, type: currentType, notes, mileage, reimbursable, employee: employeeName };
     entries.unshift(entry);
     pushEntryToSheet(entry);
     showToast('✓ Time logged!');
@@ -662,6 +676,8 @@ function clearForm() {
   document.getElementById('projectName').value = '';
   document.getElementById('hours').value = '';
   document.getElementById('notes').value = '';
+  document.getElementById('mileage').value = '';
+  document.getElementById('reimbursable').value = '';
   document.getElementById('jobBadge').style.display = 'none';
   document.getElementById('subPhase').innerHTML = '<option value="">— Select —</option>';
   document.getElementById('workType').innerHTML = '<option value="">— Select —</option>';
@@ -761,6 +777,7 @@ function renderEntries() {
         ${e.workType ? `<span class="tag ${wtClass(e.workType)}">${e.workType}</span>` : ''}
       </div>
       ${e.notes ? `<div class="entry-notes">${e.notes}</div>` : ''}
+      ${(e.mileage || e.reimbursable) ? `<div class="entry-notes" style="color:var(--muted)">${e.mileage ? '🚗 '+e.mileage+' mi' : ''}${e.mileage && e.reimbursable ? '  ' : ''}${e.reimbursable ? '💵 $'+parseFloat(e.reimbursable).toFixed(2) : ''}</div>` : ''}
       <div class="entry-date">${fmtDate(e.date)}</div>
     </div>
     <div class="edit-hint">tap to edit</div>
@@ -781,8 +798,8 @@ function exportCSV() {
   if (!filtered.length) { showToast('No entries to export.'); return; }
   const sorted = [...filtered].sort((a,b) => a.date.localeCompare(b.date));
   const q = s => '"' + String(s||'').replace(/"/g,'""') + '"';
-  const hdrs = ['Date','Employee','Job Number','Project','Sub-Phase','Work Type','Job/Proposal','Hours','Notes'];
-  const rows = sorted.map(e => [q(fmtDate(e.date)),q(e.employee||employeeName),q(e.jobNumber||''),q(e.project),q(e.subPhase||''),q(e.workType||''),q(e.type),e.hours,q(e.notes||'')]);
+  const hdrs = ['Date','Employee','Job Number','Project','Sub-Phase','Work Type','Job/Proposal','Hours','Mileage','Reimbursable','Notes'];
+  const rows = sorted.map(e => [q(fmtDate(e.date)),q(e.employee||employeeName),q(e.jobNumber||''),q(e.project),q(e.subPhase||''),q(e.workType||''),q(e.type),e.hours,e.mileage||0,e.reimbursable||0,q(e.notes||'')]);
   rows.push([q(''),q(''),q(''),q('TOTAL'),q(''),q(''),q(''),sorted.reduce((s,e)=>s+e.hours,0),q('')]);
   const csv = [hdrs.map(h=>q(h)).join(','), ...rows.map(r=>r.join(','))].join('\n');
   const blob = new Blob([csv], {type:'text/csv'});
