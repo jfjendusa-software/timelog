@@ -932,6 +932,7 @@ function handleFileInput(files, type) {
             if (seqMatch) {
               window._seqToJob = window._seqToJob || {};
               window._seqToJob[seqMatch[1]] = project.jobNumber;
+              console.log('seqToJob mapped:', seqMatch[1], '->', project.jobNumber);
             }
             results.push(project);
           }
