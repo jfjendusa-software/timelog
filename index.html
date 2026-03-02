@@ -313,7 +313,7 @@ select option { background: #1a1a1a; }
     ondragover="event.preventDefault();this.classList.add('dz-over')"
     ondragleave="this.classList.remove('dz-over')"
     ondrop="handleDrop(event,'phases')">
-    <input type="file" id="phasesFiles" accept=".xlsx" multiple onchange="handleFileInput(this.files,'phases')">
+    <input type="file" id="phasesFiles" accept=".xlsx" multiple onclick="event.stopPropagation()" onchange="handleFileInput(this.files,'phases')">
     <div class="upload-icon">📋</div>
     <p>Click or drag all <strong>Phases</strong> .xlsx files here<br>
     <span style="font-size:11px;">Select all at once with Ctrl+A in file picker</span></p>
@@ -326,7 +326,7 @@ select option { background: #1a1a1a; }
     ondragover="event.preventDefault();this.classList.add('dz-over')"
     ondragleave="this.classList.remove('dz-over')"
     ondrop="handleDrop(event,'trans')">
-    <input type="file" id="transFiles" accept=".xlsx" multiple onchange="handleFileInput(this.files,'trans')">
+    <input type="file" id="transFiles" accept=".xlsx" multiple onclick="event.stopPropagation()" onchange="handleFileInput(this.files,'trans')">
     <div class="upload-icon">⏱</div>
     <p>Click or drag all <strong>Transactions</strong> .xlsx files here<br>
     <span style="font-size:11px;">Select all at once with Ctrl+A in file picker</span></p>
