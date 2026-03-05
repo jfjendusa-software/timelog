@@ -163,6 +163,7 @@ select option { background: #1a1a1a; }
 <div class="tabs">
   <div class="tab active" onclick="switchTab('log')">Log Time</div>
   <div class="tab" onclick="switchTab('entries')">My Entries</div>
+  <div class="tab" onclick="switchTab('projects')">Projects</div>
   <div class="tab" onclick="switchTab('manager')">Manager</div>
 </div>
 
@@ -213,6 +214,7 @@ select option { background: #1a1a1a; }
 
   <div class="budget-panel" id="budgetPanel">
     <div class="budget-title">📊 Budget — <span id="bpWorkType"></span></div>
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:4px;">Team Total</div>
     <div class="budget-numbers">
       <div class="budget-num">
         <div class="val" id="bpLogged">—</div>
@@ -244,6 +246,26 @@ select option { background: #1a1a1a; }
     </div>
     <div class="slider-labels">
       <span>0%</span><span id="bpPct">0%</span><span>100%</span>
+    </div>
+    <div id="bpPersonal" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:4px;">My Allocation</div>
+      <div class="budget-numbers">
+        <div class="budget-num">
+          <div class="val" id="bpMyAlloc">—</div>
+          <div class="lbl">$ Allocated</div>
+        </div>
+        <div class="budget-num">
+          <div class="val" id="bpMySpent">—</div>
+          <div class="lbl">$ Spent</div>
+        </div>
+        <div class="budget-num">
+          <div class="val" id="bpMyLeft">—</div>
+          <div class="lbl">$ Left</div>
+        </div>
+      </div>
+      <div class="slider-track" style="margin-top:6px;">
+        <div class="slider-fill" id="bpMySlider" style="width:0%"></div>
+      </div>
     </div>
   </div>
 
@@ -302,6 +324,20 @@ select option { background: #1a1a1a; }
 </div>
 
 <!-- MANAGER -->
+
+<div class="panel" id="panel-projects">
+  <div class="section-title">Projects</div>
+
+  <div class="form-group" style="margin-bottom:16px;">
+    <label>Select Project</label>
+    <select id="pmProjectSelect" onchange="onPMProjectChange()">
+      <option value="">— Select a project —</option>
+    </select>
+  </div>
+
+  <div id="pmContent"></div>
+</div>
+
 <div class="panel" id="panel-manager">
   <div class="section-title">Manager Setup</div>
   <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">
@@ -355,6 +391,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxheuoHFs70c-6l3jxw3
 let entries      = JSON.parse(localStorage.getItem('timelog_entries')      || '[]');
 let projects     = JSON.parse(localStorage.getItem('timelog_projects')     || '[]');
 let transactions = JSON.parse(localStorage.getItem('timelog_transactions') || '[]');
+let allocations  = JSON.parse(localStorage.getItem('timelog_allocations')  || '{}');
 let currentType  = 'Job';
 let currentFilter = 'all';
 let recognition  = null;
@@ -386,11 +423,12 @@ function saveSetup() {
 
 // ── TABS ──────────────────────────────────────────────────────────────────
 function switchTab(tab) {
-  ['log','entries','manager'].forEach((t, i) => {
+  ['log','entries','projects','manager'].forEach((t, i) => {
     document.querySelectorAll('.tab')[i].classList.toggle('active', t === tab);
     document.getElementById('panel-' + t).classList.toggle('active', t === tab);
   });
   if (tab === 'entries') renderEntries();
+  if (tab === 'projects') renderProjectsTab();
 }
 
 // ── PROJECT AUTOCOMPLETE ──────────────────────────────────────────────────
@@ -513,6 +551,32 @@ function updateBudgetPanel() {
   document.getElementById('bpSlider').style.background = color;
   document.getElementById('bpPct').textContent        = pct.toFixed(0) + '%';
   document.getElementById('budgetPanel').classList.add('visible');
+
+  // ── Personal allocation section ────────────────────────────────────────
+  const phaseKey  = subPhase + '|' + workType;
+  const myAlloc   = (allocations[project.jobNumber] || {})[phaseKey] || {};
+  const myBudget  = parseFloat(myAlloc[employeeName]) || 0;
+  const personalEl = document.getElementById('bpPersonal');
+  if (myBudget > 0) {
+    // My hours from Ajera + app
+    const myAjeraSpent = phaseTrans.filter(t => t.employee === employeeName).reduce((s,t) => s + (t.spent||0), 0);
+    const myAppHrs  = entries.filter(e => e.project === name && e.subPhase === subPhase && e.workType === workType && e.employee === employeeName).reduce((s,e) => s+e.hours, 0);
+    const myAppSpent = myAppHrs * billableRate;
+    const mySpent   = myAjeraSpent + myAppSpent;
+    const myLeft    = myBudget - mySpent;
+    const myPct     = myBudget > 0 ? Math.min(100, (mySpent / myBudget) * 100) : 0;
+    const myColor   = myPct >= 90 ? 'var(--red)' : myPct >= 70 ? 'var(--yellow)' : 'var(--accent2)';
+    document.getElementById('bpMyAlloc').textContent = '$' + myBudget.toLocaleString();
+    document.getElementById('bpMySpent').textContent = '$' + Math.round(mySpent).toLocaleString();
+    document.getElementById('bpMySpent').className   = 'val ' + (myPct >= 90 ? 'red' : myPct >= 70 ? 'yellow' : 'green');
+    document.getElementById('bpMyLeft').textContent  = (myLeft < 0 ? '-$' : '$') + Math.abs(Math.round(myLeft)).toLocaleString();
+    document.getElementById('bpMyLeft').className    = 'val ' + (myLeft < 0 ? 'red' : myLeft < myBudget * 0.1 ? 'yellow' : 'green');
+    document.getElementById('bpMySlider').style.width      = myPct + '%';
+    document.getElementById('bpMySlider').style.background = myColor;
+    personalEl.style.display = 'block';
+  } else {
+    personalEl.style.display = 'none';
+  }
 }
 
 // ── VOICE ─────────────────────────────────────────────────────────────────
@@ -1123,6 +1187,137 @@ function parseTransactionsRows(rows, filename) {
   return results;
 }
 
+
+// ── PROJECTS TAB ─────────────────────────────────────────────────────────
+
+function renderProjectsTab() {
+  const sel = document.getElementById('pmProjectSelect');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Select a project —</option>';
+  projects.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.jobNumber;
+    opt.textContent = p.name + ' (' + p.jobNumber + ')';
+    if (p.jobNumber === cur) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  if (cur) renderPMContent(cur);
+}
+
+function onPMProjectChange() {
+  const jn = document.getElementById('pmProjectSelect').value;
+  renderPMContent(jn);
+}
+
+function renderPMContent(jobNumber) {
+  const el = document.getElementById('pmContent');
+  if (!jobNumber) { el.innerHTML = ''; return; }
+
+  const proj = projects.find(p => p.jobNumber === jobNumber);
+  if (!proj) { el.innerHTML = ''; return; }
+
+  // Get employees and their rates from transactions for this project
+  const projTrans = transactions.filter(t => t.jobNumber === jobNumber);
+  
+  // Build employee->rate map (use highest rate seen per employee)
+  const empRates = {};
+  projTrans.forEach(t => {
+    if (t.employee && t.spent > 0 && t.hours > 0) {
+      const rate = t.spent / t.hours;
+      if (!empRates[t.employee] || rate > empRates[t.employee]) {
+        empRates[t.employee] = rate;
+      }
+    }
+  });
+
+  const alloc = allocations[jobNumber] || {};
+  let html = '';
+
+  (proj.phases || []).forEach(phase => {
+    const key = phase.subPhase + '|' + phase.workType;
+    const phaseAlloc = alloc[key] || {};
+    
+    // Hours logged per employee for this phase
+    const phaseEmpHours = {};
+    const phaseEmpSpent = {};
+    projTrans.filter(t => t.subPhase === phase.subPhase && t.workType === phase.workType)
+      .forEach(t => {
+        phaseEmpHours[t.employee] = (phaseEmpHours[t.employee] || 0) + t.hours;
+        phaseEmpSpent[t.employee] = (phaseEmpSpent[t.employee] || 0) + t.spent;
+      });
+
+    // Total allocated so far
+    const totalAllocated = Object.values(phaseAlloc).reduce((s, v) => s + (parseFloat(v) || 0), 0);
+    const pct = phase.budget > 0 ? Math.min(100, (totalAllocated / phase.budget) * 100) : 0;
+    const over = totalAllocated > phase.budget;
+
+    html += `<div class="pm-phase-block">
+      <div class="pm-phase-title">${phase.subPhase} › ${phase.workType}</div>
+      <div class="pm-budget-total">
+        Total Budget: <strong>$${phase.budget.toLocaleString()}</strong> &nbsp;·&nbsp; 
+        Allocated: <strong style="color:${over ? 'var(--red)' : 'var(--accent2)'}">$${totalAllocated.toLocaleString()}</strong> &nbsp;·&nbsp;
+        Remaining: <strong>$${(phase.budget - totalAllocated).toLocaleString()}</strong>
+      </div>
+      <div class="pm-budget-bar"><div class="pm-budget-fill${over?' over':''}" style="width:${pct}%"></div></div>`;
+
+    // List all employees who have worked on this phase
+    const employees = Object.keys(phaseEmpHours);
+    // Also add employees with existing allocations even if no hours yet
+    Object.keys(phaseAlloc).forEach(emp => { if (!employees.includes(emp)) employees.push(emp); });
+
+    if (employees.length === 0) {
+      html += `<div style="font-size:12px;color:var(--muted);font-style:italic;">No employees have logged time on this phase yet</div>`;
+    } else {
+      employees.forEach(emp => {
+        const rate = empRates[emp] ? '$' + empRates[emp].toFixed(0) + '/hr' : '—';
+        const hrs  = phaseEmpHours[emp] ? phaseEmpHours[emp].toFixed(1) + 'h logged' : '0h logged';
+        const spent = phaseEmpSpent[emp] ? '$' + phaseEmpSpent[emp].toFixed(0) + ' spent' : '$0 spent';
+        const allocVal = phaseAlloc[emp] || '';
+        html += `<div class="pm-employee-row">
+          <div class="pm-employee-name">${emp}</div>
+          <div class="pm-employee-rate">${rate}</div>
+          <input class="pm-alloc-input" type="number" min="0" step="100"
+            placeholder="$ alloc" value="${allocVal}"
+            data-job="${jobNumber}" data-key="${key}" data-emp="${emp}"
+            oninput="onAllocInput(this)">
+          <div class="pm-alloc-hrs">${hrs}</div>
+        </div>
+        <div class="pm-spent-row" style="padding-left:0;margin-bottom:8px;">
+          <span>${spent}</span>
+          <span>${allocVal ? '$' + Math.max(0, (parseFloat(allocVal)||0) - (phaseEmpSpent[emp]||0)).toFixed(0) + ' remaining' : ''}</span>
+        </div>`;
+      });
+    }
+
+    html += `<button class="pm-save-btn" onclick="savePMAllocations('${jobNumber}')">💾 Save Allocations</button>
+    </div>`;
+  });
+
+  el.innerHTML = html || '<div style="color:var(--muted);font-size:13px;">No phases found for this project.</div>';
+}
+
+function onAllocInput(input) {
+  const jobNumber = input.dataset.job;
+  const key       = input.dataset.key;
+  const emp       = input.dataset.emp;
+  const val       = parseFloat(input.value) || 0;
+  if (!allocations[jobNumber]) allocations[jobNumber] = {};
+  if (!allocations[jobNumber][key]) allocations[jobNumber][key] = {};
+  allocations[jobNumber][key][emp] = val;
+  // Update remaining display inline
+  renderPMContent(jobNumber);
+  document.getElementById('pmProjectSelect').value = jobNumber;
+}
+
+function savePMAllocations(jobNumber) {
+  localStorage.setItem('timelog_allocations', JSON.stringify(allocations));
+  // Save to Sheet
+  fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'saveAllocations', jobNumber, data: allocations[jobNumber] || {} }) })
+    .then(r => r.json())
+    .then(() => showToast('✓ Allocations saved!'))
+    .catch(() => showToast('✓ Saved locally (offline)'));
+}
+
 function pushEntryToSheet(entry) {
   fetch(SCRIPT_URL, {method:'POST', body:JSON.stringify({action:'save',...entry})}).catch(()=>{});
   setSyncStatus('⟳ Saving…','var(--accent)');
@@ -1168,11 +1363,18 @@ function syncFromSheet() {
         projects = data.projects.map(p => ({ ...p, name: (p.name || '').trim(), jobNumber: (p.jobNumber || '').trim() }));
         localStorage.setItem('timelog_projects', JSON.stringify(projects));
         renderProjectList();
+        // Refresh projects tab if open
+        if (document.getElementById('panel-projects').classList.contains('active')) renderProjectsTab();
       }
 
       if (data.transactions && data.transactions.length) {
         transactions = data.transactions;
         localStorage.setItem('timelog_transactions', JSON.stringify(transactions));
+      }
+
+      if (data.allocations && Object.keys(data.allocations).length) {
+        allocations = data.allocations;
+        localStorage.setItem('timelog_allocations', JSON.stringify(allocations));
       }
 
       const projCount = projects.length;
