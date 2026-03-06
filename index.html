@@ -1033,9 +1033,34 @@ function finalizeUpload(type, results, fileCount) {
     localStorage.setItem('timelog_transactions', JSON.stringify(transactions));
     pushTransactionsToSheet(transactions, null);
   } else {
-    // Time Record List upload: keep _phases_ baseline, replace all non-_phases_ rows
-    const phaseBaseline = transactions.filter(t => t.employee === '_phases_');
-    transactions = phaseBaseline.concat(results);
+    // Time Record List upload: recalculate _phases_ baseline using new TRL data,
+    // so the gap = Phases total - TRL total is always correct.
+    const newTrans = results;
+    const phaseTrans = [];
+    projects.forEach(proj => {
+      (proj.phases || []).forEach(ph => {
+        if ((ph.spent || 0) <= 0) return;
+        const tlSpent = newTrans
+          .filter(t => t.jobNumber === proj.jobNumber && t.subPhase === ph.subPhase && t.workType === ph.workType)
+          .reduce((s, t) => s + (t.spent || 0), 0);
+        const tlHours = newTrans
+          .filter(t => t.jobNumber === proj.jobNumber && t.subPhase === ph.subPhase && t.workType === ph.workType)
+          .reduce((s, t) => s + (t.hours || 0), 0);
+        const histSpent = Math.max(0, (ph.spent || 0) - tlSpent);
+        const histHours = Math.max(0, (ph.hours || 0) - tlHours);
+        if (histSpent > 0 || histHours > 0) {
+          phaseTrans.push({
+            employee:  '_phases_',
+            jobNumber: proj.jobNumber,
+            subPhase:  ph.subPhase,
+            workType:  ph.workType,
+            hours:     histHours,
+            spent:     histSpent
+          });
+        }
+      });
+    });
+    transactions = newTrans.concat(phaseTrans);
     localStorage.setItem('timelog_transactions', JSON.stringify(transactions));
     statusEl.textContent = '✓ ' + results.length + ' transactions loaded from ' + fileCount + ' files — saving to cloud...';
     pushTransactionsToSheet(transactions, statusEl);
