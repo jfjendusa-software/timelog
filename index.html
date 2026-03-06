@@ -542,10 +542,10 @@ function updateBudgetPanel() {
   document.getElementById('bpRemaining').textContent  = allottedHrs > 0 ? remaining.toFixed(1) + 'h' : '—';
   document.getElementById('bpRemaining').className    = 'val ' + cls;
   document.getElementById('bpDollar').textContent     = dollarBudget > 0 ? '$' + dollarBudget.toLocaleString() : '—';
-  document.getElementById('bpSpent').textContent      = totalSpent > 0 ? '$' + Math.round(totalSpent).toLocaleString() : '—';
+  document.getElementById('bpSpent').textContent      = '$' + Math.round(totalSpent).toLocaleString();
   document.getElementById('bpSpent').className        = 'val ' + cls;
   const drEl = document.getElementById('bpDollarRemaining');
-  drEl.textContent = totalSpent > 0 ? ((dollarRemaining < 0 ? '-$' : '$') + Math.abs(Math.round(dollarRemaining)).toLocaleString()) : '—';
+  drEl.textContent = (dollarRemaining < 0 ? '-$' : '$') + Math.abs(Math.round(dollarRemaining)).toLocaleString();
   drEl.className   = 'val ' + (dollarRemaining < 0 ? 'red' : dollarRemaining < dollarBudget * 0.1 ? 'yellow' : 'green');
   document.getElementById('bpSlider').style.width     = pct + '%';
   document.getElementById('bpSlider').style.background = color;
