@@ -770,7 +770,7 @@ function saveEntry() {
   const jobNumber = proj ? proj.jobNumber : '';
 
   if (editingId !== null) {
-    const idx = entries.findIndex(e => e.id === editingId);
+    const idx = entries.findIndex(e => String(e.id) === String(editingId));
     if (idx !== -1) {
       entries[idx] = { ...entries[idx], date, project, subPhase, workType, jobNumber, hours, type: currentType, notes, mileage, reimbursable };
       updateEntryInSheet(entries[idx]);
@@ -780,7 +780,7 @@ function saveEntry() {
     document.getElementById('cancelEditBtn').style.display = 'none';
     showToast('✓ Entry updated!');
   } else {
-    const entry = { id: Date.now(), date, project, subPhase, workType, jobNumber, hours, type: currentType, notes, mileage, reimbursable, employee: employeeName };
+    const entry = { id: Date.now() + Math.floor(Math.random() * 1000), date, project, subPhase, workType, jobNumber, hours, type: currentType, notes, mileage, reimbursable, employee: employeeName };
     entries.unshift(entry);
     pushEntryToSheet(entry);
     showToast('✓ Time logged!');
@@ -906,7 +906,7 @@ function renderEntries() {
 
 function deleteEntry(id) {
   if (!confirm('Delete this entry?')) return;
-  entries = entries.filter(e => e.id !== id);
+  entries = entries.filter(e => String(e.id) !== String(id));
   localStorage.setItem('timelog_entries', JSON.stringify(entries));
   renderEntries();
   deleteEntryFromSheet(id);
