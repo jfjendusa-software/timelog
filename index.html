@@ -15,21 +15,17 @@
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; padding-bottom: 100px; }
-
 header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--bg); z-index: 100; }
 .logo { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
 .logo span { color: var(--accent); }
 .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
 .date-pill { font-family: 'DM Mono', monospace; font-size: 11px; background: var(--surface2); border: 1px solid var(--border); padding: 5px 10px; border-radius: 999px; color: var(--muted); }
 #syncStatus { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
-
 .tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 57px; z-index: 99; }
 .tab { flex: 1; padding: 12px; text-align: center; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
 .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
 .panel { display: none; padding: 20px; max-width: 500px; margin: 0 auto; }
 .panel.active { display: block; }
-
 /* SETUP */
 .setup-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; gap: 20px; }
 .setup-overlay .logo2 { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; }
@@ -38,7 +34,6 @@ header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); displa
 .setup-overlay input { width: 100%; max-width: 320px; background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 18px; padding: 14px 18px; outline: none; text-align: center; }
 .setup-overlay input:focus { border-color: var(--accent); }
 .setup-btn { width: 100%; max-width: 320px; padding: 15px; border-radius: var(--radius); border: none; background: var(--accent); color: #000; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; }
-
 label { font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; display: block; margin-bottom: 6px; }
 input[type=text], input[type=date], input[type=number], textarea, select { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; padding: 12px 14px; outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
 input:focus, textarea:focus, select:focus { border-color: var(--accent); }
@@ -47,18 +42,15 @@ select option { background: #1a1a1a; }
 .field-row { display: flex; gap: 12px; }
 .field-row > div { flex: 1; }
 .form-group { margin-bottom: 14px; }
-
 .autocomplete-wrap { position: relative; }
 .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface2); border: 1px solid var(--accent); border-top: none; border-radius: 0 0 var(--radius) var(--radius); z-index: 50; max-height: 200px; overflow-y: auto; display: none; }
 .autocomplete-list.open { display: block; }
 .autocomplete-item { padding: 10px 14px; font-size: 14px; cursor: pointer; border-bottom: 1px solid var(--border); }
 .autocomplete-item:hover { background: rgba(232,255,60,0.1); color: var(--accent); }
 .job-badge { display: inline-block; font-family: 'DM Mono', monospace; font-size: 11px; background: rgba(232,255,60,0.1); border: 1px solid rgba(232,255,60,0.3); color: var(--accent); padding: 4px 10px; border-radius: 999px; margin-top: 6px; }
-
 .toggle-group { display: flex; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 .toggle-group button { flex: 1; padding: 11px 10px; border: none; background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
 .toggle-group button.active { background: var(--accent); color: #000; }
-
 /* BUDGET PANEL */
 .budget-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; display: none; }
 .budget-panel.visible { display: block; }
@@ -73,7 +65,6 @@ select option { background: #1a1a1a; }
 .slider-track { height: 10px; background: var(--surface2); border-radius: 999px; overflow: hidden; margin-bottom: 6px; border: 1px solid var(--border); }
 .slider-fill { height: 100%; border-radius: 999px; transition: width 0.5s ease, background 0.3s; }
 .slider-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
-
 /* VOICE */
 .voice-section { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 20px; padding-top: 4px; }
 .ai-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; background: rgba(232,255,60,0.1); border: 1px solid rgba(232,255,60,0.3); color: var(--accent); padding: 3px 8px; border-radius: 999px; font-family: 'DM Mono', monospace; }
@@ -90,10 +81,8 @@ select option { background: #1a1a1a; }
 .paste-box { width: 100%; display: none; }
 .paste-box textarea { border-color: var(--accent2); margin-bottom: 8px; }
 .parse-btn { width: 100%; padding: 11px; border-radius: var(--radius); border: none; background: var(--accent2); color: #000; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; }
-
 #submitBtn { width: 100%; padding: 15px; border-radius: var(--radius); border: none; background: var(--accent); color: #000; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 6px; }
 #cancelEditBtn { width: 100%; padding: 12px; border-radius: var(--radius); border: 1px solid var(--border); background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; margin-top: 8px; display: none; }
-
 /* ENTRIES */
 .entries-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
 .section-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
@@ -104,7 +93,6 @@ select option { background: #1a1a1a; }
 .total-bar span { color: var(--muted); }
 .total-bar strong { font-family: 'DM Mono', monospace; color: var(--accent); font-size: 16px; }
 .export-btn { padding: 8px 14px; border-radius: var(--radius); border: 1px solid var(--accent); background: transparent; color: var(--accent); font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer; }
-
 .entry-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 4px; position: relative; cursor: pointer; transition: border-color 0.2s; }
 .entry-card:hover { border-color: var(--accent); }
 .entry-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
@@ -124,7 +112,6 @@ select option { background: #1a1a1a; }
 .delete-btn:hover { color: var(--red); background: rgba(255,80,80,0.1); }
 .edit-hint { font-size: 10px; color: var(--border); text-align: right; margin-bottom: 8px; font-family: 'DM Mono', monospace; padding-right: 4px; }
 .empty-state { text-align: center; color: var(--muted); font-size: 14px; padding: 40px 20px; }
-
 /* PROJECTS TAB */
 .pm-phase-block { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; margin-bottom:12px; }
 .pm-phase-title { font-size:17px; font-weight:700; color:var(--text); margin-bottom:6px; }
@@ -141,7 +128,6 @@ select option { background: #1a1a1a; }
 .pm-save-btn { width:100%; padding:10px; background:var(--accent); color:#000; border:none; border-radius:var(--radius); font-weight:700; font-size:14px; cursor:pointer; margin-top:8px; }
 .pm-save-btn:active { opacity:0.8; }
 .pm-spent-row { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid var(--border); }
-
 /* MANAGER */
 .upload-box { border: 2px dashed var(--border); border-radius: var(--radius); padding: 24px; text-align: center; cursor: pointer; transition: border-color 0.2s; margin-bottom: 14px; }
 .upload-box:hover { border-color: var(--accent); }
@@ -154,13 +140,11 @@ select option { background: #1a1a1a; }
 .project-item .pname { font-weight: 500; font-size: 14px; }
 .project-item .pjob { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); margin-top: 2px; }
 .project-item .pphase { font-size: 12px; color: var(--muted); margin-top: 4px; padding-left: 8px; border-left: 2px solid var(--border); }
-
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--accent); color: #000; padding: 12px 24px; border-radius: 999px; font-weight: 500; font-size: 14px; z-index: 999; transition: transform 0.3s ease; white-space: nowrap; }
 .toast.show { transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
-
 <!-- SETUP -->
 <div class="setup-overlay" id="setupOverlay">
   <div class="logo2">Time<span>LOG</span></div>
@@ -168,7 +152,6 @@ select option { background: #1a1a1a; }
   <input type="text" id="setupName" placeholder="Your full name" autocomplete="name">
   <button class="setup-btn" onclick="saveSetup()">Get Started →</button>
 </div>
-
 <header>
   <div class="logo">Time<span>LOG</span></div>
   <div class="header-right">
@@ -176,14 +159,12 @@ select option { background: #1a1a1a; }
     <div id="syncStatus"></div>
   </div>
 </header>
-
 <div class="tabs">
   <div class="tab active" onclick="switchTab('log')">Log Time</div>
   <div class="tab" onclick="switchTab('entries')">My Entries</div>
   <div class="tab" onclick="switchTab('projects')">Projects</div>
   <div class="tab" onclick="switchTab('manager')">Manager</div>
 </div>
-
 <!-- LOG TIME -->
 <div class="panel active" id="panel-log">
   <div class="voice-section">
@@ -199,12 +180,10 @@ select option { background: #1a1a1a; }
       <button class="parse-btn" onclick="parsePastedVoice()">✦ Parse This Text</button>
     </div>
   </div>
-
   <div class="form-group">
     <label>Date</label>
     <input type="date" id="entryDate">
   </div>
-
   <div class="form-group">
     <label>Project</label>
     <div class="autocomplete-wrap">
@@ -213,7 +192,6 @@ select option { background: #1a1a1a; }
     </div>
     <div id="jobBadge" style="display:none" class="job-badge"></div>
   </div>
-
   <div class="field-row">
     <div class="form-group">
       <label>Sub-Phase</label>
@@ -228,7 +206,6 @@ select option { background: #1a1a1a; }
       </select>
     </div>
   </div>
-
   <div class="budget-panel" id="budgetPanel">
     <div class="budget-title">📊 Budget — <span id="bpWorkType"></span></div>
     <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:4px;">Team Total</div>
@@ -297,7 +274,6 @@ select option { background: #1a1a1a; }
       </div>
     </div>
   </div>
-
   <div class="field-row">
     <div class="form-group">
       <label>Hours</label>
@@ -311,7 +287,6 @@ select option { background: #1a1a1a; }
       </div>
     </div>
   </div>
-
   <div class="field-row">
     <div class="form-group">
       <label>Mileage</label>
@@ -322,16 +297,13 @@ select option { background: #1a1a1a; }
       <input type="number" id="reimbursable" placeholder="0.00" step="0.01" min="0">
     </div>
   </div>
-
   <div class="form-group">
     <label>Notes</label>
     <textarea id="notes" placeholder="What did you work on?"></textarea>
   </div>
-
   <button id="submitBtn" onclick="saveEntry()">+ Log Time</button>
   <button id="cancelEditBtn" onclick="cancelEdit()">✕ Cancel Edit</button>
 </div>
-
 <!-- ENTRIES -->
 <div class="panel" id="panel-entries">
   <div class="entries-header">
@@ -351,28 +323,22 @@ select option { background: #1a1a1a; }
   </div>
   <div id="entriesList"></div>
 </div>
-
 <!-- MANAGER -->
-
 <div class="panel" id="panel-projects">
   <div class="section-title">Projects</div>
-
   <div class="form-group" style="margin-bottom:16px;">
     <label>Select Project</label>
     <select id="pmProjectSelect" onchange="onPMProjectChange()">
       <option value="">— Select a project —</option>
     </select>
   </div>
-
   <div id="pmContent"></div>
 </div>
-
 <div class="panel" id="panel-manager">
   <div class="section-title">Manager Setup</div>
   <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">
     Upload your combined Ajera reports to Google Drive each week, then tap the button below to sync all projects into the app.
   </p>
-
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;">
     <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:10px;font-weight:500;">Weekly Steps</div>
     <div style="font-size:13px;color:var(--text);line-height:2.2;">
@@ -382,7 +348,6 @@ select option { background: #1a1a1a; }
       <span style="color:var(--muted);font-family:'Courier New',monospace;margin-right:8px;">4</span> <span style="color:var(--muted)">Re-upload Phases files only when budgets change</span>
     </div>
   </div>
-
   <label style="margin-bottom:8px;display:block;">① Phases Files — all projects at once</label>
   <div class="drop-zone" id="phasesDropZone"
     onclick="document.getElementById('phasesFiles').click()"
@@ -395,7 +360,6 @@ select option { background: #1a1a1a; }
     <span style="font-size:11px;">Select all at once with Ctrl+A in file picker</span></p>
     <div id="phasesStatus" style="margin-top:8px;font-size:12px;font-family:'Courier New',monospace;color:var(--accent2);"></div>
   </div>
-
   <label style="margin-bottom:8px;display:block;margin-top:16px;">② Transactions Files — all projects at once</label>
   <div class="drop-zone" id="transDropZone"
     onclick="document.getElementById('transFiles').click()"
@@ -408,15 +372,11 @@ select option { background: #1a1a1a; }
     <span style="font-size:11px;">Time Record Lists covers all projects in one file</span></p>
     <div id="transStatus" style="margin-top:8px;font-size:12px;font-family:'Courier New',monospace;color:var(--accent2);"></div>
   </div>
-
   <div id="projectListDisplay"></div>
 </div>
-
 <div class="toast" id="toast"></div>
-
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxheuoHFs70c-6l3jxw3RtKsdZc-JnjY4wDNSREXV7BZ1MrJozl49wDG-HYwQ9_VI4SfQ/exec';
-
 let entries      = JSON.parse(localStorage.getItem('timelog_entries')      || '[]');
 let projects     = JSON.parse(localStorage.getItem('timelog_projects')     || '[]');
 let transactions = JSON.parse(localStorage.getItem('timelog_transactions') || '[]');
@@ -427,7 +387,6 @@ let recognition  = null;
 let isListening  = false;
 let editingId    = null;
 let employeeName = localStorage.getItem('timelog_name') || '';
-
 // ── INIT ──────────────────────────────────────────────────────────────────
 function init() {
   if (employeeName) document.getElementById('setupOverlay').style.display = 'none';
@@ -440,7 +399,6 @@ function init() {
   renderProjectList();
   syncFromSheet();
 }
-
 function saveSetup() {
   const n = document.getElementById('setupName').value.trim();
   if (!n) { showToast('Please enter your name.'); return; }
@@ -449,7 +407,6 @@ function saveSetup() {
   document.getElementById('setupOverlay').style.display = 'none';
   showToast('Welcome, ' + n.split(' ')[0] + '!');
 }
-
 // ── TABS ──────────────────────────────────────────────────────────────────
 function switchTab(tab) {
   ['log','entries','projects','manager'].forEach((t, i) => {
@@ -459,7 +416,6 @@ function switchTab(tab) {
   if (tab === 'entries') renderEntries();
   if (tab === 'projects') renderProjectsTab();
 }
-
 // ── PROJECT AUTOCOMPLETE ──────────────────────────────────────────────────
 function projectAutocomplete(val) {
   clearProjectUI();
@@ -481,14 +437,12 @@ function projectAutocomplete(val) {
   });
   document.getElementById('projectDropdown').classList.add('open');
 }
-
 function clearProjectUI() {
   document.getElementById('jobBadge').style.display = 'none';
   document.getElementById('subPhase').innerHTML = '<option value="">— Select —</option>';
   document.getElementById('workType').innerHTML = '<option value="">— Select —</option>';
   document.getElementById('budgetPanel').classList.remove('visible');
 }
-
 function selectProject(name) {
   name = (name || '').trim();
   const project = projects.find(p => (p.name || '').trim() === name);
@@ -508,7 +462,6 @@ function selectProject(name) {
   document.getElementById('workType').innerHTML = '<option value="">— Select —</option>';
   document.getElementById('budgetPanel').classList.remove('visible');
 }
-
 function onSubPhaseChange() {
   const name = (document.getElementById('projectName').value || '').trim();
   const subPhase = document.getElementById('subPhase').value;
@@ -521,7 +474,6 @@ function onSubPhaseChange() {
     const o = document.createElement('option'); o.value = p.workType; o.textContent = p.workType; wt.appendChild(o);
   });
 }
-
 function updateBudgetPanel() {
   const name     = document.getElementById('projectName').value;
   const subPhase = document.getElementById('subPhase').value;
@@ -530,40 +482,32 @@ function updateBudgetPanel() {
   if (!project || !subPhase || !workType) { document.getElementById('budgetPanel').classList.remove('visible'); return; }
   const phase = project.phases.find(p => p.subPhase === subPhase && p.workType === workType);
   if (!phase) return;
-
   // All transactions for this phase + worktype, filtered by jobNumber when available
   const phaseTrans = transactions.filter(t => 
     t.subPhase === subPhase && t.workType === workType &&
     (!t.jobNumber || !project.jobNumber || t.jobNumber === project.jobNumber)
   );
-  
   // Total hours and dollars already in Ajera
   const ajeraHrs   = phaseTrans.reduce((s,t) => s + (t.hours || 0), 0);
   const totalSpentAjera = phaseTrans.reduce((s,t) => s + (t.spent || 0), 0);
-
   // Billable rate from actual spend data
   const billableRate = ajeraHrs > 0 && totalSpentAjera > 0 ? totalSpentAjera / ajeraHrs : 185;
-
   // Hours from this app for this project + subphase + worktype (all employees)
   const appHrs = entries
     .filter(e => e.project === name && e.subPhase === subPhase && e.workType === workType)
     .reduce((s,e) => s + e.hours, 0);
-
   const totalLogged  = ajeraHrs + appHrs;
   const dollarBudget = phase.budget;
   const allottedHrs  = billableRate > 0 ? dollarBudget / billableRate : 0;
   const remaining    = Math.max(0, allottedHrs - totalLogged);
   const pct          = allottedHrs > 0 ? Math.min((totalLogged / allottedHrs) * 100, 100) : 0;
-
   let color = 'var(--accent2)', cls = 'green';
   if (pct >= 90) { color = 'var(--red)'; cls = 'red'; }
   else if (pct >= 70) { color = 'var(--yellow)'; cls = 'yellow'; }
-
   // Total dollars spent (from Ajera) + estimated from app entries
   const appSpent    = appHrs * billableRate;
   const totalSpent  = totalSpentAjera + appSpent;
   const dollarRemaining = dollarBudget - totalSpent;
-
   document.getElementById('bpWorkType').textContent   = workType;
   document.getElementById('bpLogged').textContent     = totalLogged.toFixed(1) + 'h';
   document.getElementById('bpLogged').className       = 'val ' + cls;
@@ -580,7 +524,6 @@ function updateBudgetPanel() {
   document.getElementById('bpSlider').style.background = color;
   document.getElementById('bpPct').textContent        = pct.toFixed(0) + '%';
   document.getElementById('budgetPanel').classList.add('visible');
-
   // ── Personal allocation section ────────────────────────────────────────
   const phaseKey  = subPhase + '|' + workType;
   const phaseAllocMap = (allocations[project.jobNumber] || {})[phaseKey] || {};
@@ -634,7 +577,6 @@ function updateBudgetPanel() {
     personalEl.style.display = 'none';
   }
 }
-
 // ── VOICE ─────────────────────────────────────────────────────────────────
 function setupSpeech() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -652,11 +594,9 @@ function setupSpeech() {
     showTranscript({ 'not-allowed':'🚫 Mic blocked.', 'no-speech':'No speech detected.' }[e.error] || '⚠ ' + e.error);
   };
 }
-
 function showTranscript(msg) {
   const t = document.getElementById('transcript'); t.textContent = msg; t.classList.add('visible');
 }
-
 function toggleVoice() {
   if (isListening) { stopListening(); return; }
   showTranscript('⏳ Starting mic...');
@@ -666,7 +606,6 @@ function toggleVoice() {
       .catch(() => showTranscript('🚫 Mic blocked. Tap "Samsung? Use keyboard mic" below.'));
   } else { startListening(); }
 }
-
 function startListening() {
   if (!recognition) { showTranscript('⚠ Not supported. Use keyboard mic.'); return; }
   isListening = true;
@@ -674,18 +613,15 @@ function startListening() {
   showTranscript('🎤 Listening — speak now');
   try { recognition.start(); } catch(e) { stopListening(); showTranscript('⚠ ' + e.message); }
 }
-
 function stopListening() {
   isListening = false;
   document.getElementById('voiceRing').classList.remove('listening');
   try { recognition.stop(); } catch(e) {}
 }
-
 function openVoicePaste() {
   const b = document.getElementById('voicePasteBox');
   b.style.display = b.style.display === 'block' ? 'none' : 'block';
 }
-
 function parsePastedVoice() {
   const t = document.getElementById('voicePasteInput').value.trim();
   if (!t) return;
@@ -694,21 +630,17 @@ function parsePastedVoice() {
   document.getElementById('voicePasteInput').value = '';
   parseVoice(t);
 }
-
 function parseVoice(text) {
   const t = text.toLowerCase();
-
   // Hours
   const hrM = t.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?)/);
   const minM = t.match(/(\d+)\s*minutes?/);
   let hrs = hrM ? parseFloat(hrM[1]) : 0;
   if (minM) hrs += parseFloat(minM[1]) / 60;
   if (hrs > 0) document.getElementById('hours').value = Math.round(hrs * 4) / 4;
-
   // Type
   if (t.includes('proposal')) setType('Proposal');
   else setType('Job');
-
   // Project match
   let best = null, bestScore = 0;
   projects.forEach(p => {
@@ -716,7 +648,6 @@ function parseVoice(text) {
     if (score > bestScore) { bestScore = score; best = p; }
   });
   if (best && bestScore > 0) { document.getElementById('projectName').value = best.name; selectProject(best.name); }
-
   // Sub-phase
   const spSel = document.getElementById('subPhase');
   if (t.includes('apartment') || t.includes('unit')) {
@@ -724,7 +655,6 @@ function parseVoice(text) {
   } else if (t.includes('clubhouse')) {
     for (let o of spSel.options) { if (o.value.toLowerCase().includes('club')) { spSel.value = o.value; onSubPhaseChange(); break; } }
   }
-
   // Work type
   const wtSel = document.getElementById('workType');
   if (t.includes('structural') || t.includes('structure')) {
@@ -734,7 +664,6 @@ function parseVoice(text) {
   } else if (t.includes('construction')) {
     for (let o of wtSel.options) { if (o.value.toLowerCase().includes('construct')) { wtSel.value = o.value; updateBudgetPanel(); break; } }
   }
-
   // Notes — strip commands
   let notes = text
     .replace(/\d+(?:\.\d+)?\s*(?:hours?|hrs?)/gi, '')
@@ -744,14 +673,12 @@ function parseVoice(text) {
   if (notes.length > 4) document.getElementById('notes').value = notes;
   showToast('Voice parsed — review & confirm');
 }
-
 // ── FORM ──────────────────────────────────────────────────────────────────
 function setType(t) {
   currentType = t;
   document.getElementById('btnJob').classList.toggle('active', t === 'Job');
   document.getElementById('btnProposal').classList.toggle('active', t === 'Proposal');
 }
-
 function saveEntry() {
   const project     = document.getElementById('projectName').value.trim();
   const subPhase    = document.getElementById('subPhase').value;
@@ -761,14 +688,11 @@ function saveEntry() {
   const notes       = document.getElementById('notes').value.trim();
   const mileage     = parseFloat(document.getElementById('mileage').value) || 0;
   const reimbursable = parseFloat(document.getElementById('reimbursable').value) || 0;
-
   if (!project)       { showToast('Please enter a project.'); return; }
   if (!hours || hours <= 0) { showToast('Please enter valid hours.'); return; }
   if (!date)          { showToast('Please select a date.'); return; }
-
   const proj = projects.find(p => p.name === project);
   const jobNumber = proj ? proj.jobNumber : '';
-
   if (editingId !== null) {
     const idx = entries.findIndex(e => String(e.id) === String(editingId));
     if (idx !== -1) {
@@ -785,13 +709,11 @@ function saveEntry() {
     pushEntryToSheet(entry);
     showToast('✓ Time logged!');
   }
-
   localStorage.setItem('timelog_entries', JSON.stringify(entries));
   clearForm();
   renderEntries();
   updateBudgetPanel();
 }
-
 function clearForm() {
   document.getElementById('projectName').value = '';
   document.getElementById('hours').value = '';
@@ -806,7 +728,6 @@ function clearForm() {
   document.getElementById('transcript').classList.remove('visible');
   document.getElementById('transcript').textContent = '';
 }
-
 function editEntry(id) {
   const e = entries.find(e => String(e.id) === String(id));
   if (!e) return;
@@ -838,14 +759,12 @@ function editEntry(id) {
     showToast('Editing — make changes and save');
   }, 100);
 }
-
 function cancelEdit() {
   editingId = null;
   document.getElementById('submitBtn').textContent = '+ Log Time';
   document.getElementById('cancelEditBtn').style.display = 'none';
   clearForm();
 }
-
 // ── ENTRIES ───────────────────────────────────────────────────────────────
 function setFilter(f, btn) {
   currentFilter = f;
@@ -853,7 +772,6 @@ function setFilter(f, btn) {
   btn.classList.add('active');
   renderEntries();
 }
-
 function filterEntries() {
   const now = new Date(), todayStr = now.toISOString().split('T')[0];
   return entries.filter(e => {
@@ -865,7 +783,6 @@ function filterEntries() {
     return true;
   });
 }
-
 function wtClass(w) {
   if (!w) return '';
   const wl = w.toLowerCase();
@@ -874,11 +791,9 @@ function wtClass(w) {
   if (wl.includes('construct')) return 'construction';
   return '';
 }
-
 function fmtDate(d) {
   return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
 }
-
 function renderEntries() {
   const filtered = filterEntries();
   document.getElementById('totalHours').textContent = filtered.reduce((s,e) => s + e.hours, 0).toFixed(2);
@@ -903,7 +818,6 @@ function renderEntries() {
     <div class="edit-hint">tap to edit</div>
   `).join('');
 }
-
 function deleteEntry(id) {
   if (!confirm('Delete this entry?')) return;
   entries = entries.filter(e => String(e.id) !== String(id));
@@ -911,7 +825,6 @@ function deleteEntry(id) {
   renderEntries();
   deleteEntryFromSheet(id);
 }
-
 // ── EXPORT ────────────────────────────────────────────────────────────────
 function exportCSV() {
   const filtered = filterEntries();
@@ -929,7 +842,6 @@ function exportCSV() {
   setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},2000);
   showToast('✓ Exported to Downloads');
 }
-
 // ── AJERA IMPORT ──────────────────────────────────────────────────────────
 function uploadPhases(input) {
   const file = input.files[0]; if (!file) return;
@@ -941,13 +853,11 @@ function uploadPhases(input) {
     const rows = XLSX.utils.sheet_to_json(ws, {header:1});
     const parsed = [];
     let curProject = null, curSubPhase = null;
-
     rows.forEach(row => {
       if (!row[0]) return;
       const raw = String(row[0]);
       const cell = raw.trim();
       const budget = parseFloat(row[7]) || 0;
-
       // Job number pattern — project level
       const jobMatch = cell.match(/^([A-Z]{2,6}-\d{3,5})\s+(.+)/);
       if (jobMatch) {
@@ -959,17 +869,13 @@ function uploadPhases(input) {
         return;
       }
       if (!curProject) return;
-
       const isWorkType = /architectural|structure|structural|construction|engineering|design/i.test(cell);
       const isPhaseHeader = /phase\s+(i|ii|iii|iv|v|\d+)/i.test(cell);
-
       if (isPhaseHeader) return; // skip Phase I / Phase II headers
-
       if (!isWorkType && budget !== phase_budget_of(curProject, cell)) {
         // It's a sub-phase name
         if (budget >= 0) curSubPhase = cell;
       }
-
       if (isWorkType && curSubPhase && budget > 0) {
         let wt = cell;
         if (/struct/i.test(cell)) wt = 'Structural Engineering';
@@ -978,7 +884,6 @@ function uploadPhases(input) {
         curProject.phases.push({ subPhase: curSubPhase, workType: wt, budget });
       }
     });
-
     projects = parsed.filter(p => p.phases.length > 0);
     localStorage.setItem('timelog_projects', JSON.stringify(projects));
     renderProjectList();
@@ -986,12 +891,10 @@ function uploadPhases(input) {
   };
   reader.readAsArrayBuffer(file);
 }
-
 function phase_budget_of(proj, name) {
   // helper placeholder — always returns -1 so non-work-type rows fall through to subphase detection
   return -1;
 }
-
 function uploadTransactions(input) {
   const file = input.files[0]; if (!file) return;
   document.getElementById('transFileName').textContent = '✓ ' + file.name;
@@ -1005,7 +908,6 @@ function uploadTransactions(input) {
     const ei = headers.indexOf('Employee');
     const hi = headers.indexOf('Units/Hours');
     const si = headers.indexOf('Spent Amount');
-
     transactions = rows.slice(1).filter(r => r[pi]).map(row => {
       const phaseStr = String(row[pi]);
       const parts = phaseStr.split('\n').map(s=>s.trim()).filter(Boolean);
@@ -1016,14 +918,12 @@ function uploadTransactions(input) {
                : /construct/i.test(rawWT) ? 'Construction Management' : rawWT;
       return { employee: row[ei]||'', subPhase, workType: wt, hours: parseFloat(row[hi])||0, spent: parseFloat(row[si])||0 };
     });
-
     localStorage.setItem('timelog_transactions', JSON.stringify(transactions));
     showToast('✓ ' + transactions.length + ' transactions loaded');
     updateBudgetPanel();
   };
   reader.readAsArrayBuffer(file);
 }
-
 function renderProjectList() {
   const el = document.getElementById('projectListDisplay');
   if (!projects.length) { el.innerHTML = ''; return; }
@@ -1035,7 +935,6 @@ function renderProjectList() {
         ${p.phases.map(ph => `<div class="pphase">${ph.subPhase} › ${ph.workType} — $${ph.budget.toLocaleString()}</div>`).join('')}
       </div>`).join('');
 }
-
 // ── MANAGER FILE UPLOAD ───────────────────────────────────────────────────
 function handleDrop(e, type) {
   e.preventDefault();
@@ -1043,17 +942,13 @@ function handleDrop(e, type) {
   document.getElementById(zoneId).classList.remove('dz-over');
   handleFileInput(e.dataTransfer.files, type);
 }
-
 function handleFileInput(files, type) {
   const arr = Array.from(files).filter(f => f.name.endsWith('.xlsx'));
   if (!arr.length) { showToast('No .xlsx files found.'); return; }
-
   const statusEl = document.getElementById(type === 'phases' ? 'phasesStatus' : 'transStatus');
   statusEl.textContent = 'Reading ' + arr.length + ' files...';
-
   let done = 0;
   let results = [];
-
   arr.forEach(file => {
     const reader = new FileReader();
     reader.onload = e => {
@@ -1086,7 +981,6 @@ function handleFileInput(files, type) {
     reader.readAsArrayBuffer(file);
   });
 }
-
 function finalizeUpload(type, results, fileCount) {
   const statusEl = document.getElementById(type === 'phases' ? 'phasesStatus' : 'transStatus');
   if (type === 'phases') {
@@ -1103,7 +997,6 @@ function finalizeUpload(type, results, fileCount) {
   }
   updateBudgetPanel();
 }
-
 function parsePhasesRows(rows) {
   let jobNumber = null, projectName = null, curSubPhase = null;
   const phases  = [];
@@ -1138,7 +1031,6 @@ function parsePhasesRows(rows) {
   if (!jobNumber || !phases.length) return null;
   return { jobNumber, name: projectName, phases };
 }
-
 function parseTransactionsRows(rows, filename) {
   if (!rows || !rows.length) return [];
   let headerRow = -1;
@@ -1150,15 +1042,15 @@ function parseTransactionsRows(rows, filename) {
   const phaseIdx = headers.findIndex(h => h.includes('Phase ID'));
   const empIdx   = headers.indexOf('Employee');
   if (phaseIdx < 0 || empIdx < 0) return [];
-
   // Detect format: Time Record Lists has job number in col 0 and "Billing Rate"+"WIP Amount"
   // Old Transactions format has "Units/Hours" and "Spent Amount"
   const isTimeRecords = headers.some(h => h.includes('Billing Rate')) && headers[0].includes('Project ID');
-  
   if (isTimeRecords) {
     // NEW FORMAT: Time Record Lists — single file, all projects, job number in col 0
     const hoursIdx = headers.indexOf('Hours');
     const rateIdx  = headers.indexOf('Billing Rate');
+    const wipIdx   = headers.indexOf('WIP Amount');
+    const spentColIdx = headers.indexOf('Spent Amount');
     const results  = [];
     for (let i = headerRow + 1; i < rows.length; i++) {
       const row = rows[i];
@@ -1177,14 +1069,15 @@ function parseTransactionsRows(rows, filename) {
       else if (/construct/i.test(rawWT)) wt = 'Construction Management';
       const hours = parseFloat(row[hoursIdx]) || 0;
       const rate  = parseFloat(row[rateIdx])  || 0;
-      const spent = hours * rate;
+      const spent = wipIdx >= 0 && row[wipIdx] != null    ? parseFloat(row[wipIdx])      || 0
+                  : spentColIdx >= 0 && row[spentColIdx] != null ? parseFloat(row[spentColIdx]) || 0
+                  : hours * rate;
       const emp   = String(row[empIdx] || '').trim();
       if (hours <= 0) continue;
       results.push({ employee: emp, jobNumber, subPhase, workType: wt, hours, spent });
     }
     return results;
   }
-
   // OLD FORMAT: individual Transactions files
   const hoursIdx = headers.indexOf('Units/Hours');
   const spentIdx = headers.indexOf('Spent Amount');
@@ -1242,10 +1135,7 @@ function parseTransactionsRows(rows, filename) {
   }
   return results;
 }
-
-
 // ── PROJECTS TAB ─────────────────────────────────────────────────────────
-
 function renderProjectsTab() {
   const sel = document.getElementById('pmProjectSelect');
   const cur = sel.value;
@@ -1259,22 +1149,17 @@ function renderProjectsTab() {
   });
   if (cur) renderPMContent(cur);
 }
-
 function onPMProjectChange() {
   const jn = document.getElementById('pmProjectSelect').value;
   renderPMContent(jn);
 }
-
 function renderPMContent(jobNumber) {
   const el = document.getElementById('pmContent');
   if (!jobNumber) { el.innerHTML = ''; return; }
-
   const proj = projects.find(p => p.jobNumber === jobNumber);
   if (!proj) { el.innerHTML = ''; return; }
-
   // Get employees and their rates from transactions for this project
   const projTrans = transactions.filter(t => t.jobNumber === jobNumber);
-  
   // Build employee->rate map (use highest rate seen per employee)
   const empRates = {};
   projTrans.forEach(t => {
@@ -1285,14 +1170,11 @@ function renderPMContent(jobNumber) {
       }
     }
   });
-
   const alloc = allocations[jobNumber] || {};
   let html = '';
-
   (proj.phases || []).forEach(phase => {
     const key = phase.subPhase + '|' + phase.workType;
     const phaseAlloc = alloc[key] || {};
-    
     // Hours logged per employee for this phase
     const phaseEmpHours = {};
     const phaseEmpSpent = {};
@@ -1301,14 +1183,12 @@ function renderPMContent(jobNumber) {
         phaseEmpHours[t.employee] = (phaseEmpHours[t.employee] || 0) + t.hours;
         phaseEmpSpent[t.employee] = (phaseEmpSpent[t.employee] || 0) + t.spent;
       });
-
     // Total spent across all employees for this phase
     const totalPhaseSpent = Object.values(phaseEmpSpent).reduce((s,v) => s + v, 0);
     const totalAllocated = Object.values(phaseAlloc).reduce((s, v) => s + (parseFloat(v) || 0), 0);
     const budgetRemaining = phase.budget - totalPhaseSpent;
     const pct = phase.budget > 0 ? Math.min(100, (totalPhaseSpent / phase.budget) * 100) : 0;
     const over = totalPhaseSpent > phase.budget;
-
     html += `<div class="pm-phase-block">
       <div class="pm-phase-title">${phase.subPhase} › ${phase.workType}</div>
       <div class="pm-budget-total">
@@ -1318,12 +1198,10 @@ function renderPMContent(jobNumber) {
         &nbsp;·&nbsp; Allocated: <strong>$${Math.round(totalAllocated).toLocaleString()}</strong>&nbsp;·&nbsp; Unallocated: <strong style="color:${phase.budget - totalAllocated < 0 ? 'var(--red)' : 'var(--muted)'}">${phase.budget - totalAllocated < 0 ? '-$' : '$'}${Math.abs(Math.round(phase.budget - totalAllocated)).toLocaleString()}</strong>
       </div>
       <div class="pm-budget-bar"><div class="pm-budget-fill${over?' over':''}" style="width:${pct}%"></div></div>`;
-
     // List all employees who have worked on this phase
     const employees = Object.keys(phaseEmpHours);
     // Also add employees with existing allocations even if no hours yet
     Object.keys(phaseAlloc).forEach(emp => { if (!employees.includes(emp)) employees.push(emp); });
-
     if (employees.length === 0) {
       html += `<div style="font-size:12px;color:var(--muted);font-style:italic;">No employees have logged time on this phase yet</div>`;
     } else {
@@ -1355,14 +1233,11 @@ function renderPMContent(jobNumber) {
         </div>`;
       });
     }
-
     html += `<button class="pm-save-btn" onclick="savePMAllocations('${jobNumber}')">💾 Save Allocations</button>
     </div>`;
   });
-
   el.innerHTML = html || '<div style="color:var(--muted);font-size:13px;">No phases found for this project.</div>';
 }
-
 function onAllocInput(input) {
   const jobNumber = input.dataset.job;
   const key       = input.dataset.key;
@@ -1389,7 +1264,6 @@ function onAllocInput(input) {
     }
   }
 }
-
 function savePMAllocations(jobNumber) {
   localStorage.setItem('timelog_allocations', JSON.stringify(allocations));
   // Save to Sheet
@@ -1398,34 +1272,28 @@ function savePMAllocations(jobNumber) {
     .then(() => showToast('✓ Allocations saved!'))
     .catch(() => showToast('✓ Saved locally (offline)'));
 }
-
 function pushEntryToSheet(entry) {
   fetch(SCRIPT_URL, {method:'POST', body:JSON.stringify({action:'save',...entry})}).catch(()=>{});
   setSyncStatus('⟳ Saving…','var(--accent)');
   setTimeout(()=>setSyncStatus('✓ Synced','var(--accent2)'),2000);
 }
-
 function updateEntryInSheet(entry) {
   fetch(SCRIPT_URL, {method:'POST', body:JSON.stringify({action:'update',...entry})}).catch(()=>{});
 }
-
 function deleteEntryFromSheet(id) {
   fetch(SCRIPT_URL, {method:'POST', body:JSON.stringify({action:'delete',id})}).catch(()=>{});
 }
-
 // ── GOOGLE SHEETS SYNC ───────────────────────────────────────────────────
 function setSyncStatus(msg, color) {
   const el = document.getElementById('syncStatus');
   if (el) { el.textContent = msg; el.style.color = color||'var(--muted)'; }
 }
-
 function syncFromSheet() {
   setSyncStatus('⟳ Syncing…', 'var(--accent)');
   fetch(SCRIPT_URL + '?action=getAll')
     .then(r => r.json())
     .then(data => {
       if (data.status !== 'ok') throw new Error(data.message);
-
       // Entries
       if (data.entries && data.entries.length) {
         entries = data.entries.map(e => ({
@@ -1438,7 +1306,6 @@ function syncFromSheet() {
         localStorage.setItem('timelog_entries', JSON.stringify(entries));
         renderEntries();
       }
-
       // Always load latest projects and transactions from Sheet
       if (data.projects && data.projects.length) {
         projects = data.projects.map(p => ({ ...p, name: (p.name || '').trim(), jobNumber: (p.jobNumber || '').trim() }));
@@ -1450,23 +1317,19 @@ function syncFromSheet() {
           renderProjectsTab();
         }
       }
-
       if (data.transactions && data.transactions.length) {
         transactions = data.transactions;
         localStorage.setItem('timelog_transactions', JSON.stringify(transactions));
       }
-
       if (data.allocations && Object.keys(data.allocations).length) {
         allocations = data.allocations;
         localStorage.setItem('timelog_allocations', JSON.stringify(allocations));
       }
-
       const projCount = projects.length;
       setSyncStatus('✓ Synced' + (projCount ? ' · ' + projCount + ' projects' : ''), 'var(--accent2)');
     })
     .catch(() => setSyncStatus('⚠ Offline — using cached data', 'var(--red)'));
 }
-
 function pushProjectsToSheet(projects, statusEl) {
   fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'saveProjects', projects }) })
     .then(r => r.json())
@@ -1479,13 +1342,11 @@ function pushProjectsToSheet(projects, statusEl) {
       showToast('⚠ Projects saved locally only');
     });
 }
-
 function pushTransactionsToSheet(transactions, statusEl) {
   // Send in chunks of 500 rows to avoid payload limits
   const CHUNK = 500;
   const chunks = [];
   for (let i = 0; i < transactions.length; i += CHUNK) chunks.push(transactions.slice(i, i + CHUNK));
-  
   // Send first chunk with action=saveTransactions, rest with action=appendTransactions
   const sendChunk = (idx) => {
     if (idx >= chunks.length) {
@@ -1504,12 +1365,10 @@ function pushTransactionsToSheet(transactions, statusEl) {
   };
   sendChunk(0);
 }
-
 function showToast(msg) {
   const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), 2800);
 }
-
 init();
 </script>
 </body>
