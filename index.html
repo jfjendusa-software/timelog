@@ -125,6 +125,23 @@ select option { background: #1a1a1a; }
 .edit-hint { font-size: 10px; color: var(--border); text-align: right; margin-bottom: 8px; font-family: 'DM Mono', monospace; padding-right: 4px; }
 .empty-state { text-align: center; color: var(--muted); font-size: 14px; padding: 40px 20px; }
 
+/* PROJECTS TAB */
+.pm-phase-block { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; margin-bottom:12px; }
+.pm-phase-title { font-size:17px; font-weight:700; color:var(--text); margin-bottom:6px; }
+.pm-budget-total { font-size:12px; color:var(--muted); margin-bottom:8px; line-height:1.8; }
+.pm-budget-bar { height:4px; background:var(--border); border-radius:2px; margin-bottom:12px; }
+.pm-budget-fill { height:100%; border-radius:2px; background:var(--accent2); transition:width 0.3s; }
+.pm-budget-fill.over { background:var(--red); }
+.pm-employee-row { display:flex; align-items:center; gap:10px; margin-bottom:4px; font-size:13px; }
+.pm-employee-name { flex:1; color:var(--text); font-weight:600; }
+.pm-employee-rate { font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; min-width:60px; }
+.pm-alloc-input { width:90px; background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:6px 8px; color:var(--text); font-family:'DM Mono',monospace; font-size:13px; text-align:right; }
+.pm-alloc-input:focus { outline:none; border-color:var(--accent); }
+.pm-alloc-hrs { font-size:11px; color:var(--muted); min-width:60px; text-align:right; }
+.pm-save-btn { width:100%; padding:10px; background:var(--accent); color:#000; border:none; border-radius:var(--radius); font-weight:700; font-size:14px; cursor:pointer; margin-top:8px; }
+.pm-save-btn:active { opacity:0.8; }
+.pm-spent-row { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+
 /* MANAGER */
 .upload-box { border: 2px dashed var(--border); border-radius: var(--radius); padding: 24px; text-align: center; cursor: pointer; transition: border-color 0.2s; margin-bottom: 14px; }
 .upload-box:hover { border-color: var(--accent); }
@@ -250,6 +267,18 @@ select option { background: #1a1a1a; }
     <div id="bpPersonal" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
       <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:4px;">My Allocation</div>
       <div class="budget-numbers">
+        <div class="budget-num">
+          <div class="val" id="bpMyHrsLogged">—</div>
+          <div class="lbl">Hrs Logged</div>
+        </div>
+        <div class="budget-num">
+          <div class="val" id="bpMyAllottedHrs">—</div>
+          <div class="lbl">Allotted Hrs</div>
+        </div>
+        <div class="budget-num">
+          <div class="val" id="bpMyHrsLeft">—</div>
+          <div class="lbl">Hrs Left</div>
+        </div>
         <div class="budget-num">
           <div class="val" id="bpMyAlloc">—</div>
           <div class="lbl">$ Allocated</div>
@@ -559,20 +588,30 @@ function updateBudgetPanel() {
   const personalEl = document.getElementById('bpPersonal');
   if (myBudget > 0) {
     // My hours from Ajera + app
+    const myAjeraHrs  = phaseTrans.filter(t => t.employee === employeeName).reduce((s,t) => s + (t.hours||0), 0);
     const myAjeraSpent = phaseTrans.filter(t => t.employee === employeeName).reduce((s,t) => s + (t.spent||0), 0);
     const myAppHrs  = entries.filter(e => e.project === name && e.subPhase === subPhase && e.workType === workType && e.employee === employeeName).reduce((s,e) => s+e.hours, 0);
     const myAppSpent = myAppHrs * billableRate;
     const mySpent   = myAjeraSpent + myAppSpent;
+    const myHrsLogged = myAjeraHrs + myAppHrs;
+    const myAllottedHrs = billableRate > 0 ? myBudget / billableRate : 0;
+    const myHrsLeft = myAllottedHrs - myHrsLogged;
     const myLeft    = myBudget - mySpent;
     const myPct     = myBudget > 0 ? Math.min(100, (mySpent / myBudget) * 100) : 0;
     const myColor   = myPct >= 90 ? 'var(--red)' : myPct >= 70 ? 'var(--yellow)' : 'var(--accent2)';
-    document.getElementById('bpMyAlloc').textContent = '$' + myBudget.toLocaleString();
-    document.getElementById('bpMySpent').textContent = '$' + Math.round(mySpent).toLocaleString();
-    document.getElementById('bpMySpent').className   = 'val ' + (myPct >= 90 ? 'red' : myPct >= 70 ? 'yellow' : 'green');
-    document.getElementById('bpMyLeft').textContent  = (myLeft < 0 ? '-$' : '$') + Math.abs(Math.round(myLeft)).toLocaleString();
-    document.getElementById('bpMyLeft').className    = 'val ' + (myLeft < 0 ? 'red' : myLeft < myBudget * 0.1 ? 'yellow' : 'green');
-    document.getElementById('bpMySlider').style.width      = myPct + '%';
-    document.getElementById('bpMySlider').style.background = myColor;
+    const myCls     = myPct >= 90 ? 'red' : myPct >= 70 ? 'yellow' : 'green';
+    document.getElementById('bpMyAlloc').textContent        = '$' + myBudget.toLocaleString();
+    document.getElementById('bpMySpent').textContent        = '$' + Math.round(mySpent).toLocaleString();
+    document.getElementById('bpMySpent').className          = 'val ' + myCls;
+    document.getElementById('bpMyLeft').textContent         = (myLeft < 0 ? '-$' : '$') + Math.abs(Math.round(myLeft)).toLocaleString();
+    document.getElementById('bpMyLeft').className           = 'val ' + (myLeft < 0 ? 'red' : myLeft < myBudget * 0.1 ? 'yellow' : 'green');
+    document.getElementById('bpMyHrsLogged').textContent    = myHrsLogged.toFixed(1) + 'h';
+    document.getElementById('bpMyHrsLogged').className      = 'val ' + myCls;
+    document.getElementById('bpMyAllottedHrs').textContent  = myAllottedHrs > 0 ? myAllottedHrs.toFixed(1) + 'h' : '—';
+    document.getElementById('bpMyHrsLeft').textContent      = (myHrsLeft < 0 ? '-' : '') + Math.abs(myHrsLeft).toFixed(1) + 'h';
+    document.getElementById('bpMyHrsLeft').className        = 'val ' + (myHrsLeft < 0 ? 'red' : myHrsLeft < myAllottedHrs * 0.1 ? 'yellow' : 'green');
+    document.getElementById('bpMySlider').style.width       = myPct + '%';
+    document.getElementById('bpMySlider').style.background  = myColor;
     personalEl.style.display = 'block';
   } else {
     personalEl.style.display = 'none';
