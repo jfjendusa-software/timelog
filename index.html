@@ -1246,17 +1246,20 @@ function renderPMContent(jobNumber) {
         phaseEmpSpent[t.employee] = (phaseEmpSpent[t.employee] || 0) + t.spent;
       });
 
-    // Total allocated so far
+    // Total spent across all employees for this phase
+    const totalPhaseSpent = Object.values(phaseEmpSpent).reduce((s,v) => s + v, 0);
     const totalAllocated = Object.values(phaseAlloc).reduce((s, v) => s + (parseFloat(v) || 0), 0);
-    const pct = phase.budget > 0 ? Math.min(100, (totalAllocated / phase.budget) * 100) : 0;
-    const over = totalAllocated > phase.budget;
+    const budgetRemaining = phase.budget - totalPhaseSpent;
+    const pct = phase.budget > 0 ? Math.min(100, (totalPhaseSpent / phase.budget) * 100) : 0;
+    const over = totalPhaseSpent > phase.budget;
 
     html += `<div class="pm-phase-block">
       <div class="pm-phase-title">${phase.subPhase} › ${phase.workType}</div>
       <div class="pm-budget-total">
         Total Budget: <strong>$${phase.budget.toLocaleString()}</strong> &nbsp;·&nbsp; 
-        Allocated: <strong style="color:${over ? 'var(--red)' : 'var(--accent2)'}">$${totalAllocated.toLocaleString()}</strong> &nbsp;·&nbsp;
-        Remaining: <strong>$${(phase.budget - totalAllocated).toLocaleString()}</strong>
+        Spent: <strong style="color:${over ? 'var(--red)' : 'var(--accent2)'}">$${Math.round(totalPhaseSpent).toLocaleString()}</strong> &nbsp;·&nbsp;
+        Remaining: <strong style="color:${budgetRemaining < 0 ? 'var(--red)' : 'var(--text)'}">${budgetRemaining < 0 ? '-$' : '$'}${Math.abs(Math.round(budgetRemaining)).toLocaleString()}</strong>
+        ${totalAllocated > 0 ? `&nbsp;·&nbsp; Allocated: <strong>$${Math.round(totalAllocated).toLocaleString()}</strong>` : ''}
       </div>
       <div class="pm-budget-bar"><div class="pm-budget-fill${over?' over':''}" style="width:${pct}%"></div></div>`;
 
@@ -1273,6 +1276,13 @@ function renderPMContent(jobNumber) {
         const hrs  = phaseEmpHours[emp] ? phaseEmpHours[emp].toFixed(1) + 'h logged' : '0h logged';
         const spent = phaseEmpSpent[emp] ? '$' + phaseEmpSpent[emp].toFixed(0) + ' spent' : '$0 spent';
         const allocVal = phaseAlloc[emp] || '';
+        const empSpent = phaseEmpSpent[emp] || 0;
+        const empAlloc = parseFloat(allocVal) || 0;
+        const empRemaining = empAlloc - empSpent;
+        const empRemainingStr = allocVal
+          ? (empRemaining < 0 ? '-$' : '$') + Math.abs(Math.round(empRemaining)).toLocaleString() + ' remaining'
+          : '';
+        const empRemColor = empRemaining < 0 ? 'var(--red)' : empRemaining < empAlloc * 0.1 ? 'var(--yellow)' : 'var(--accent2)';
         html += `<div class="pm-employee-row">
           <div class="pm-employee-name">${emp}</div>
           <div class="pm-employee-rate">${rate}</div>
@@ -1284,7 +1294,7 @@ function renderPMContent(jobNumber) {
         </div>
         <div class="pm-spent-row" style="padding-left:0;margin-bottom:8px;">
           <span>${spent}</span>
-          <span>${allocVal ? '$' + Math.max(0, (parseFloat(allocVal)||0) - (phaseEmpSpent[emp]||0)).toFixed(0) + ' remaining' : ''}</span>
+          <span style="color:${empRemColor}">${empRemainingStr}</span>
         </div>`;
       });
     }
