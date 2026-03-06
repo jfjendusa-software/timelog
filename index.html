@@ -493,9 +493,11 @@ function updateBudgetPanel() {
     t.employee === '_phases_' && t.subPhase === subPhase && t.workType === workType &&
     (!t.jobNumber || !project.jobNumber || t.jobNumber === project.jobNumber)
   );
-  // Total hours and dollars already in Ajera
-  const ajeraHrs        = phaseBaseRow ? (phaseBaseRow.hours || 0) : phaseTrans.reduce((s,t) => s + (t.hours || 0), 0);
-  const totalSpentAjera = phaseBaseRow ? (phaseBaseRow.spent || 0) : phaseTrans.reduce((s,t) => s + (t.spent || 0), 0);
+  // Total hours and dollars already in Ajera = Time Record List rows + historical baseline gap
+  const histSpent       = phaseBaseRow ? (phaseBaseRow.spent || 0) : 0;
+  const histHours       = phaseBaseRow ? (phaseBaseRow.hours || 0) : 0;
+  const ajeraHrs        = phaseTrans.reduce((s,t) => s + (t.hours || 0), 0) + histHours;
+  const totalSpentAjera = phaseTrans.reduce((s,t) => s + (t.spent || 0), 0) + histSpent;
   // Billable rate from actual spend data
   const billableRate = ajeraHrs > 0 && totalSpentAjera > 0 ? totalSpentAjera / ajeraHrs : 185;
   // Hours from this app for this project + subphase + worktype (all employees)
@@ -995,27 +997,39 @@ function finalizeUpload(type, results, fileCount) {
     statusEl.textContent = '✓ ' + projects.length + ' projects loaded from ' + fileCount + ' files — saving to cloud...';
     renderProjectList();
     pushProjectsToSheet(projects, statusEl);
-    // Generate phase-level transactions from Phases file spent/hours totals.
-    // These serve as the authoritative total-spent baseline (includes pre-migration history).
-    // They are stored with employee='_phases_' so they don't appear as individual employee rows
-    // but DO contribute to total phase spent in renderPMContent.
+    // Generate phase-level historical baseline transactions from Phases file.
+    // The baseline = Phases total spent MINUS what Time Record Lists already covers.
+    // This gap represents pre-migration history not in the Time Record Lists export.
+    // Stored with employee='_phases_' so they don't show as individual employee rows.
+    const currentTrans = transactions.filter(t => t.employee !== '_phases_');
     const phaseTrans = [];
     results.forEach(proj => {
       (proj.phases || []).forEach(ph => {
-        if (ph.spent > 0 || ph.hours > 0) {
+        if ((ph.spent || 0) <= 0) return;
+        // Sum what Time Record Lists already has for this phase
+        const tlSpent = currentTrans
+          .filter(t => t.jobNumber === proj.jobNumber && t.subPhase === ph.subPhase && t.workType === ph.workType)
+          .reduce((s, t) => s + (t.spent || 0), 0);
+        const tlHours = currentTrans
+          .filter(t => t.jobNumber === proj.jobNumber && t.subPhase === ph.subPhase && t.workType === ph.workType)
+          .reduce((s, t) => s + (t.hours || 0), 0);
+        // Historical gap = Phases total minus Time Record List total (floor at 0)
+        const histSpent = Math.max(0, (ph.spent || 0) - tlSpent);
+        const histHours = Math.max(0, (ph.hours || 0) - tlHours);
+        if (histSpent > 0 || histHours > 0) {
           phaseTrans.push({
             employee:  '_phases_',
             jobNumber: proj.jobNumber,
             subPhase:  ph.subPhase,
             workType:  ph.workType,
-            hours:     ph.hours  || 0,
-            spent:     ph.spent  || 0
+            hours:     histHours,
+            spent:     histSpent
           });
         }
       });
     });
-    // Merge with existing Time Record List transactions, replacing any prior _phases_ rows
-    transactions = transactions.filter(t => t.employee !== '_phases_').concat(phaseTrans);
+    // Merge: keep current Time Record List rows, replace _phases_ baseline rows
+    transactions = currentTrans.concat(phaseTrans);
     localStorage.setItem('timelog_transactions', JSON.stringify(transactions));
     pushTransactionsToSheet(transactions, null);
   } else {
@@ -1217,12 +1231,10 @@ function renderPMContent(jobNumber) {
         phaseEmpHours[t.employee] = (phaseEmpHours[t.employee] || 0) + t.hours;
         phaseEmpSpent[t.employee] = (phaseEmpSpent[t.employee] || 0) + t.spent;
       });
-    // Total spent: use Phases file baseline if available (includes pre-migration history),
-    // otherwise fall back to summing individual Time Record List transactions
+    // Total spent = Time Record List employee rows + historical _phases_ baseline gap
     const phaseBaseRow = projPhaseBase.find(t => t.subPhase === phase.subPhase && t.workType === phase.workType);
-    const totalPhaseSpent = phaseBaseRow
-      ? phaseBaseRow.spent
-      : Object.values(phaseEmpSpent).reduce((s,v) => s + v, 0);
+    const histSpent = phaseBaseRow ? (phaseBaseRow.spent || 0) : 0;
+    const totalPhaseSpent = Object.values(phaseEmpSpent).reduce((s,v) => s + v, 0) + histSpent;
     const totalAllocated = Object.values(phaseAlloc).reduce((s, v) => s + (parseFloat(v) || 0), 0);
     const budgetRemaining = phase.budget - totalPhaseSpent;
     const pct = phase.budget > 0 ? Math.min(100, (totalPhaseSpent / phase.budget) * 100) : 0;
