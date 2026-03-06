@@ -1289,7 +1289,8 @@ function renderPMContent(jobNumber) {
           <input class="pm-alloc-input" type="number" min="0" step="100"
             placeholder="$ alloc" value="${allocVal}"
             data-job="${jobNumber}" data-key="${key}" data-emp="${emp}"
-            oninput="onAllocInput(this)">
+            oninput="onAllocInput(this)" onclick="event.stopPropagation()"
+            onkeydown="event.stopPropagation()">
           <div class="pm-alloc-hrs">${hrs}</div>
         </div>
         <div class="pm-spent-row" style="padding-left:0;margin-bottom:8px;">
@@ -1314,9 +1315,23 @@ function onAllocInput(input) {
   if (!allocations[jobNumber]) allocations[jobNumber] = {};
   if (!allocations[jobNumber][key]) allocations[jobNumber][key] = {};
   allocations[jobNumber][key][emp] = val;
-  // Update remaining display inline
-  renderPMContent(jobNumber);
-  document.getElementById('pmProjectSelect').value = jobNumber;
+  // Update just the remaining label inline without re-rendering
+  const row = input.closest('.pm-employee-row');
+  if (row) {
+    const spentRow = row.nextElementSibling;
+    if (spentRow && spentRow.classList.contains('pm-spent-row')) {
+      const spentEl  = spentRow.querySelector('span:first-child');
+      const remEl    = spentRow.querySelector('span:last-child');
+      const spentAmt = parseFloat(spentEl ? spentEl.textContent.replace(/[^0-9.]/g,'') : 0) || 0;
+      const remaining = val - spentAmt;
+      if (val > 0) {
+        remEl.textContent = (remaining < 0 ? '-$' : '$') + Math.abs(Math.round(remaining)).toLocaleString() + ' remaining';
+        remEl.style.color = remaining < 0 ? 'var(--red)' : remaining < val * 0.1 ? 'var(--yellow)' : 'var(--accent2)';
+      } else {
+        remEl.textContent = '';
+      }
+    }
+  }
 }
 
 function savePMAllocations(jobNumber) {
@@ -1373,8 +1388,11 @@ function syncFromSheet() {
         projects = data.projects.map(p => ({ ...p, name: (p.name || '').trim(), jobNumber: (p.jobNumber || '').trim() }));
         localStorage.setItem('timelog_projects', JSON.stringify(projects));
         renderProjectList();
-        // Refresh projects tab if open
-        if (document.getElementById('panel-projects').classList.contains('active')) renderProjectsTab();
+        // Refresh projects tab if open and user isn't actively typing in an allocation field
+        if (document.getElementById('panel-projects').classList.contains('active') && 
+            !document.activeElement.classList.contains('pm-alloc-input')) {
+          renderProjectsTab();
+        }
       }
 
       if (data.transactions && data.transactions.length) {
