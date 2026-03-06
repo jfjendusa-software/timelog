@@ -1259,7 +1259,7 @@ function renderPMContent(jobNumber) {
         Total Budget: <strong>$${phase.budget.toLocaleString()}</strong> &nbsp;·&nbsp; 
         Spent: <strong style="color:${over ? 'var(--red)' : 'var(--accent2)'}">$${Math.round(totalPhaseSpent).toLocaleString()}</strong> &nbsp;·&nbsp;
         Remaining: <strong style="color:${budgetRemaining < 0 ? 'var(--red)' : 'var(--text)'}">${budgetRemaining < 0 ? '-$' : '$'}${Math.abs(Math.round(budgetRemaining)).toLocaleString()}</strong>
-        ${totalAllocated > 0 ? `&nbsp;·&nbsp; Allocated: <strong>$${Math.round(totalAllocated).toLocaleString()}</strong>&nbsp;·&nbsp; Unallocated: <strong style="color:${phase.budget - totalAllocated < 0 ? 'var(--red)' : 'var(--muted)'}">${phase.budget - totalAllocated < 0 ? '-$' : '$'}${Math.abs(Math.round(phase.budget - totalAllocated)).toLocaleString()}</strong>` : ''}
+        &nbsp;·&nbsp; Allocated: <strong>$${Math.round(totalAllocated).toLocaleString()}</strong>&nbsp;·&nbsp; Unallocated: <strong style="color:${phase.budget - totalAllocated < 0 ? 'var(--red)' : 'var(--muted)'}">${phase.budget - totalAllocated < 0 ? '-$' : '$'}${Math.abs(Math.round(phase.budget - totalAllocated)).toLocaleString()}</strong>
       </div>
       <div class="pm-budget-bar"><div class="pm-budget-fill${over?' over':''}" style="width:${pct}%"></div></div>`;
 
