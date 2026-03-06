@@ -485,11 +485,17 @@ function updateBudgetPanel() {
   // All transactions for this phase + worktype, filtered by jobNumber when available
   const phaseTrans = transactions.filter(t => 
     t.subPhase === subPhase && t.workType === workType &&
+    (!t.jobNumber || !project.jobNumber || t.jobNumber === project.jobNumber) &&
+    t.employee !== '_phases_'
+  );
+  // Check for Phases file baseline (authoritative total including pre-migration history)
+  const phaseBaseRow = transactions.find(t =>
+    t.employee === '_phases_' && t.subPhase === subPhase && t.workType === workType &&
     (!t.jobNumber || !project.jobNumber || t.jobNumber === project.jobNumber)
   );
   // Total hours and dollars already in Ajera
-  const ajeraHrs   = phaseTrans.reduce((s,t) => s + (t.hours || 0), 0);
-  const totalSpentAjera = phaseTrans.reduce((s,t) => s + (t.spent || 0), 0);
+  const ajeraHrs        = phaseBaseRow ? (phaseBaseRow.hours || 0) : phaseTrans.reduce((s,t) => s + (t.hours || 0), 0);
+  const totalSpentAjera = phaseBaseRow ? (phaseBaseRow.spent || 0) : phaseTrans.reduce((s,t) => s + (t.spent || 0), 0);
   // Billable rate from actual spend data
   const billableRate = ajeraHrs > 0 && totalSpentAjera > 0 ? totalSpentAjera / ajeraHrs : 185;
   // Hours from this app for this project + subphase + worktype (all employees)
@@ -989,10 +995,35 @@ function finalizeUpload(type, results, fileCount) {
     statusEl.textContent = '✓ ' + projects.length + ' projects loaded from ' + fileCount + ' files — saving to cloud...';
     renderProjectList();
     pushProjectsToSheet(projects, statusEl);
-  } else {
-    transactions = results;
+    // Generate phase-level transactions from Phases file spent/hours totals.
+    // These serve as the authoritative total-spent baseline (includes pre-migration history).
+    // They are stored with employee='_phases_' so they don't appear as individual employee rows
+    // but DO contribute to total phase spent in renderPMContent.
+    const phaseTrans = [];
+    results.forEach(proj => {
+      (proj.phases || []).forEach(ph => {
+        if (ph.spent > 0 || ph.hours > 0) {
+          phaseTrans.push({
+            employee:  '_phases_',
+            jobNumber: proj.jobNumber,
+            subPhase:  ph.subPhase,
+            workType:  ph.workType,
+            hours:     ph.hours  || 0,
+            spent:     ph.spent  || 0
+          });
+        }
+      });
+    });
+    // Merge with existing Time Record List transactions, replacing any prior _phases_ rows
+    transactions = transactions.filter(t => t.employee !== '_phases_').concat(phaseTrans);
     localStorage.setItem('timelog_transactions', JSON.stringify(transactions));
-    statusEl.textContent = '✓ ' + transactions.length + ' transactions loaded from ' + fileCount + ' files — saving to cloud...';
+    pushTransactionsToSheet(transactions, null);
+  } else {
+    // Time Record List upload: keep _phases_ baseline, replace all non-_phases_ rows
+    const phaseBaseline = transactions.filter(t => t.employee === '_phases_');
+    transactions = phaseBaseline.concat(results);
+    localStorage.setItem('timelog_transactions', JSON.stringify(transactions));
+    statusEl.textContent = '✓ ' + results.length + ' transactions loaded from ' + fileCount + ' files — saving to cloud...';
     pushTransactionsToSheet(transactions, statusEl);
   }
   updateBudgetPanel();
@@ -1002,7 +1033,9 @@ function parsePhasesRows(rows) {
   const phases  = [];
   for (let r = 0; r < rows.length; r++) {
     const cell   = String(rows[r][0] || '').trim();
-    const budget = parseFloat(rows[r][7]) || 0;
+    const budget = parseFloat(rows[r][7])  || 0;
+    const spent  = parseFloat(rows[r][10]) || 0;
+    const hours  = parseFloat(rows[r][14]) || 0;
     if (!cell) continue;
     const jobMatch = cell.match(/^([A-Z]{2,6}-\d{3,5})\s+(.+)/);
     if (jobMatch) {
@@ -1022,10 +1055,10 @@ function parsePhasesRows(rows) {
       if (/struct/i.test(wt))         wt = 'Structural Engineering';
       else if (/arch/i.test(wt))      wt = 'Architectural Design';
       else if (/construct/i.test(wt)) wt = 'Construction Management';
-      // If same subPhase+workType already exists, sum the budgets (handles split budget lines)
+      // If same subPhase+workType already exists, sum the budgets/spent/hours
       const existing = phases.find(p => p.subPhase === curSubPhase && p.workType === wt);
-      if (existing) { existing.budget += budget; }
-      else { phases.push({ subPhase: curSubPhase, workType: wt, budget }); }
+      if (existing) { existing.budget += budget; existing.spent += spent; existing.hours += hours; }
+      else { phases.push({ subPhase: curSubPhase, workType: wt, budget, spent, hours }); }
     }
   }
   if (!jobNumber || !phases.length) return null;
@@ -1158,8 +1191,9 @@ function renderPMContent(jobNumber) {
   if (!jobNumber) { el.innerHTML = ''; return; }
   const proj = projects.find(p => p.jobNumber === jobNumber);
   if (!proj) { el.innerHTML = ''; return; }
-  // Get employees and their rates from transactions for this project
-  const projTrans = transactions.filter(t => t.jobNumber === jobNumber);
+  // Get transactions for this project — exclude _phases_ baseline rows from employee display
+  const projTrans     = transactions.filter(t => t.jobNumber === jobNumber && t.employee !== '_phases_');
+  const projPhaseBase = transactions.filter(t => t.jobNumber === jobNumber && t.employee === '_phases_');
   // Build employee->rate map (use highest rate seen per employee)
   const empRates = {};
   projTrans.forEach(t => {
@@ -1183,8 +1217,12 @@ function renderPMContent(jobNumber) {
         phaseEmpHours[t.employee] = (phaseEmpHours[t.employee] || 0) + t.hours;
         phaseEmpSpent[t.employee] = (phaseEmpSpent[t.employee] || 0) + t.spent;
       });
-    // Total spent across all employees for this phase
-    const totalPhaseSpent = Object.values(phaseEmpSpent).reduce((s,v) => s + v, 0);
+    // Total spent: use Phases file baseline if available (includes pre-migration history),
+    // otherwise fall back to summing individual Time Record List transactions
+    const phaseBaseRow = projPhaseBase.find(t => t.subPhase === phase.subPhase && t.workType === phase.workType);
+    const totalPhaseSpent = phaseBaseRow
+      ? phaseBaseRow.spent
+      : Object.values(phaseEmpSpent).reduce((s,v) => s + v, 0);
     const totalAllocated = Object.values(phaseAlloc).reduce((s, v) => s + (parseFloat(v) || 0), 0);
     const budgetRemaining = phase.budget - totalPhaseSpent;
     const pct = phase.budget > 0 ? Math.min(100, (totalPhaseSpent / phase.budget) * 100) : 0;
