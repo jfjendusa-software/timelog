@@ -583,13 +583,30 @@ function updateBudgetPanel() {
 
   // ── Personal allocation section ────────────────────────────────────────
   const phaseKey  = subPhase + '|' + workType;
-  const myAlloc   = (allocations[project.jobNumber] || {})[phaseKey] || {};
-  const myBudget  = parseFloat(myAlloc[employeeName]) || 0;
+  const phaseAllocMap = (allocations[project.jobNumber] || {})[phaseKey] || {};
+  // Match employee name flexibly — "James F Jendusa" should match "James Jendusa"
+  const myAllocKey = Object.keys(phaseAllocMap).find(k => {
+    if (k === employeeName) return true;
+    const kParts = k.toLowerCase().split(/\s+/).filter(p => p.length > 1);
+    const eParts = employeeName.toLowerCase().split(/\s+/).filter(p => p.length > 1);
+    const kFirst = kParts[0], kLast = kParts[kParts.length-1];
+    const eFirst = eParts[0], eLast = eParts[eParts.length-1];
+    return kFirst === eFirst && kLast === eLast;
+  });
+  const myAlloc  = myAllocKey ? phaseAllocMap[myAllocKey] : 0;
+  const myBudget  = parseFloat(myAlloc) || 0;
   const personalEl = document.getElementById('bpPersonal');
   if (myBudget > 0) {
     // My hours from Ajera + app
-    const myAjeraHrs  = phaseTrans.filter(t => t.employee === employeeName).reduce((s,t) => s + (t.hours||0), 0);
-    const myAjeraSpent = phaseTrans.filter(t => t.employee === employeeName).reduce((s,t) => s + (t.spent||0), 0);
+    // Helper to match names with/without middle initial
+    const nameMatch = (a, b) => {
+      if (a === b) return true;
+      const ap = a.toLowerCase().split(/\s+/).filter(p=>p.length>1);
+      const bp = b.toLowerCase().split(/\s+/).filter(p=>p.length>1);
+      return ap[0]===bp[0] && ap[ap.length-1]===bp[bp.length-1];
+    };
+    const myAjeraHrs   = phaseTrans.filter(t => nameMatch(t.employee, employeeName)).reduce((s,t) => s + (t.hours||0), 0);
+    const myAjeraSpent = phaseTrans.filter(t => nameMatch(t.employee, employeeName)).reduce((s,t) => s + (t.spent||0), 0);
     const myAppHrs  = entries.filter(e => e.project === name && e.subPhase === subPhase && e.workType === workType && e.employee === employeeName).reduce((s,e) => s+e.hours, 0);
     const myAppSpent = myAppHrs * billableRate;
     const mySpent   = myAjeraSpent + myAppSpent;
